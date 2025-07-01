@@ -4,7 +4,8 @@ import { Separator } from "./ui/separator";
 
 export function RecipeSkeleton() {
     return (
-        <Card>
+        <Card className="overflow-hidden">
+            <Skeleton className="w-full aspect-video" />
             <CardHeader>
                 <Skeleton className="h-8 w-3/4 rounded-md" />
                 <Skeleton className="h-4 w-1/4 mt-2 rounded-md" />

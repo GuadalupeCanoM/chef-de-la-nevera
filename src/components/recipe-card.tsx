@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { GenerateRecipeOutput } from "@/ai/flows/generate-recipe";
@@ -13,7 +14,18 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
     const parseInstructions = (list: string) => list.split(/\n\d+\.? ?/).filter(item => item.trim() !== "");
     
     return (
-        <Card className="animate-in fade-in-50 duration-500">
+        <Card className="animate-in fade-in-50 duration-500 overflow-hidden">
+            {recipe.imageUrl && (
+                <div className="relative w-full aspect-video">
+                    <Image
+                        src={recipe.imageUrl}
+                        alt={`Image of ${recipe.recipeName}`}
+                        fill
+                        className="object-cover"
+                        data-ai-hint="recipe food"
+                    />
+                </div>
+            )}
             <CardHeader>
                 <CardTitle className="text-2xl font-headline flex items-center gap-2"><Utensils className="h-6 w-6 text-primary" /> {recipe.recipeName}</CardTitle>
                 <CardDescription className="flex items-center gap-2 pt-2 text-muted-foreground">

@@ -38,6 +38,7 @@ const GenerateRecipeOutputSchema = z.object({
   nutritionalInformation: z
     .string()
     .describe('Basic nutritional information for the recipe.'),
+  imageUrl: z.string().describe('A data URI of an image of the recipe.'),
 });
 
 export type GenerateRecipeOutput = z.infer<typeof GenerateRecipeOutputSchema>;
@@ -49,7 +50,7 @@ export async function generateRecipe(input: GenerateRecipeInput): Promise<Genera
 const generateRecipePrompt = ai.definePrompt({
   name: 'generateRecipePrompt',
   input: {schema: GenerateRecipeInputSchema},
-  output: {schema: GenerateRecipeOutputSchema},
+  output: {schema: GenerateRecipeOutputSchema.omit({ imageUrl: true })},
   prompt: `You are a highly skilled Spanish chef. Generate a traditional Spanish recipe based on the ingredients provided. The recipe should include step-by-step instructions, a list of ingredients with quantities, and the estimated cooking time. Suggest additional ingredients that could enhance the recipe.
 
 Ingredients: {{{ingredients}}}
@@ -67,7 +68,22 @@ const generateRecipeFlow = ai.defineFlow(
     outputSchema: GenerateRecipeOutputSchema,
   },
   async input => {
-    const {output} = await generateRecipePrompt(input);
-    return output!;
+    const {output: recipeDetails} = await generateRecipePrompt(input);
+    if (!recipeDetails) {
+        throw new Error('Could not generate recipe');
+    }
+
+    const {media} = await ai.generate({
+        model: 'googleai/gemini-2.0-flash-preview-image-generation',
+        prompt: `A photorealistic, appetizing photo of a freshly prepared dish of ${recipeDetails.recipeName}, ready to be served.`,
+        config: {
+            responseModalities: ['TEXT', 'IMAGE'],
+        },
+    });
+
+    return {
+        ...recipeDetails,
+        imageUrl: media?.url ?? '',
+    };
   }
 );
