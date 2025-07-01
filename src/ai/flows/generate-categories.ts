@@ -29,7 +29,6 @@ export type CategoryOutput = z.infer<typeof CategoryOutputSchema>;
 
 const generateCategoriesPrompt = ai.definePrompt({
     name: 'generateCategoriesPrompt',
-    input: { schema: z.undefined() },
     output: { schema: CategoriesOutputSchema },
     prompt: `Genera una lista de 4 categorías de comida española diversas y atractivas. Para cada categoría, proporciona un nombre en español, un slug amigable para URL y una pista de 2 palabras en inglés para generar una imagen.
 
@@ -46,7 +45,6 @@ La salida DEBE ser un array JSON válido.`,
 const generateCategoriesFlow = ai.defineFlow(
   {
     name: 'generateCategoriesFlow',
-    inputSchema: z.undefined(),
     outputSchema: z.array(CategoryOutputSchema),
   },
   async () => {
