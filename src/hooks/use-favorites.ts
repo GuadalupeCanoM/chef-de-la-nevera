@@ -18,6 +18,7 @@ export function useFavorites() {
     const [folders, setFolders] = useState<Folder[]>([]);
     const [recipeFolderMap, setRecipeFolderMap] = useState<RecipeFolderMap>({});
 
+    // Load initial state from localStorage
     useEffect(() => {
         try {
             const storedData = localStorage.getItem(FAVORITES_KEY);
@@ -32,75 +33,84 @@ export function useFavorites() {
         }
     }, []);
 
-    const _saveState = useCallback((newFavorites: GenerateRecipeOutput[], newFolders: Folder[], newMap: RecipeFolderMap) => {
+    // Save state to localStorage whenever it changes
+    useEffect(() => {
         try {
             const dataToStore = JSON.stringify({
-                favorites: newFavorites,
-                folders: newFolders,
-                recipeFolderMap: newMap
+                favorites,
+                folders,
+                recipeFolderMap
             });
             localStorage.setItem(FAVORITES_KEY, dataToStore);
-            setFavorites(newFavorites);
-            setFolders(newFolders);
-            setRecipeFolderMap(newMap);
         } catch (error) {
             console.error("Failed to save favorites to localStorage", error);
         }
-    }, []);
+    }, [favorites, folders, recipeFolderMap]);
+
 
     const updateFavorite = useCallback((recipeName: string, updatedData: Partial<GenerateRecipeOutput>) => {
-        const newFavorites = favorites.map(fav => 
-            fav.recipeName === recipeName ? { ...fav, ...updatedData } : fav
+        setFavorites(currentFavorites =>
+            currentFavorites.map(fav =>
+                fav.recipeName === recipeName ? { ...fav, ...updatedData } : fav
+            )
         );
-        _saveState(newFavorites, folders, recipeFolderMap);
-    }, [favorites, folders, recipeFolderMap, _saveState]);
+    }, []);
 
     const addFavorite = useCallback((recipe: GenerateRecipeOutput) => {
-        if (favorites.some(f => f.recipeName === recipe.recipeName)) return;
-
-        const newFavorites = [...favorites, recipe];
-        const newMap = { ...recipeFolderMap, [recipe.recipeName]: null };
-        _saveState(newFavorites, folders, newMap);
-    }, [favorites, folders, recipeFolderMap, _saveState]);
+        setFavorites(currentFavorites => {
+            if (currentFavorites.some(f => f.recipeName === recipe.recipeName)) {
+                return currentFavorites;
+            }
+            return [...currentFavorites, recipe];
+        });
+        setRecipeFolderMap(currentMap => ({ ...currentMap, [recipe.recipeName]: null }));
+    }, []);
 
     const removeFavorite = useCallback((recipeName: string) => {
-        const newFavorites = favorites.filter(fav => fav.recipeName !== recipeName);
-        const newFolders = [...folders];
-        const newMap = { ...recipeFolderMap };
-        delete newMap[recipeName];
-        _saveState(newFavorites, newFolders, newMap);
-    }, [favorites, folders, recipeFolderMap, _saveState]);
+        setFavorites(currentFavorites => currentFavorites.filter(fav => fav.recipeName !== recipeName));
+        setRecipeFolderMap(currentMap => {
+            const newMap = { ...currentMap };
+            delete newMap[recipeName];
+            return newMap;
+        });
+    }, []);
 
     const isFavorite = useCallback((recipeName: string) => {
         return favorites.some(fav => fav.recipeName === recipeName);
     }, [favorites]);
 
     const createFolder = useCallback((folderName: string) => {
-        if (folders.some(f => f.name === folderName)) return;
-
-        const newFolder: Folder = {
-            id: `folder-${Date.now()}`,
-            name: folderName,
-        };
-        const newFolders = [...folders, newFolder];
-        _saveState(favorites, newFolders, recipeFolderMap);
-    }, [folders, favorites, recipeFolderMap, _saveState]);
+        setFolders(currentFolders => {
+             if (currentFolders.some(f => f.name === folderName)) {
+                return currentFolders;
+             }
+             const newFolder: Folder = {
+                id: `folder-${Date.now()}`,
+                name: folderName,
+            };
+            return [...currentFolders, newFolder];
+        });
+    }, []);
 
     const moveRecipeToFolder = useCallback((recipeName: string, folderId: string | null) => {
-        const newMap = { ...recipeFolderMap, [recipeName]: folderId };
-        _saveState(favorites, folders, newMap);
-    }, [favorites, folders, recipeFolderMap, _saveState]);
+        setRecipeFolderMap(currentMap => ({
+            ...currentMap,
+            [recipeName]: folderId,
+        }));
+    }, []);
     
     const deleteFolder = useCallback((folderId: string) => {
-        const newFolders = folders.filter(f => f.id !== folderId);
-        const newMap = { ...recipeFolderMap };
-        Object.keys(newMap).forEach(recipeName => {
-            if (newMap[recipeName] === folderId) {
-                newMap[recipeName] = null;
-            }
+        setFolders(currentFolders => currentFolders.filter(f => f.id !== folderId));
+        setRecipeFolderMap(currentMap => {
+            const newMap = { ...currentMap };
+            Object.keys(newMap).forEach(recipeName => {
+                if (newMap[recipeName] === folderId) {
+                    newMap[recipeName] = null;
+                }
+            });
+            return newMap;
         });
-        _saveState(favorites, newFolders, newMap);
-    }, [favorites, folders, recipeFolderMap, _saveState]);
+    }, []);
 
     return { favorites, folders, recipeFolderMap, addFavorite, removeFavorite, isFavorite, createFolder, moveRecipeToFolder, deleteFolder, updateFavorite };
 }
