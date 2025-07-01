@@ -1,10 +1,11 @@
 'use client';
 
+import { useState } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { GenerateRecipeOutput } from "@/ai/flows/generate-recipe";
-import { Clock, Leaf, ListOrdered, HeartPulse, PlusCircle, Utensils, Heart } from "lucide-react";
+import { Clock, Leaf, ListOrdered, HeartPulse, PlusCircle, Utensils, Heart, Search } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { useFavorites } from "@/hooks/use-favorites";
 import { Button } from "./ui/button";
@@ -16,6 +17,7 @@ interface RecipeCardProps {
 
 export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProps) {
     const { addFavorite, removeFavorite, isFavorite } = useFavorites();
+    const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
     const isFav = isFavorite(recipe.recipeName);
 
     const parseList = (list: string) => list.split(/\n-? ?/).filter(item => item.trim() !== "");
@@ -29,9 +31,18 @@ export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProp
         }
     };
     
-    const handleSuggestionClick = (ingredient: string) => {
-        if (onGenerateWithSuggestions) {
-            onGenerateWithSuggestions([ingredient.trim()]);
+    const handleToggleIngredient = (ingredient: string) => {
+        const trimmedIngredient = ingredient.trim();
+        setSelectedIngredients(prev => 
+            prev.includes(trimmedIngredient)
+                ? prev.filter(i => i !== trimmedIngredient)
+                : [...prev, trimmedIngredient]
+        );
+    };
+
+    const handleSearchWithSelected = () => {
+        if (onGenerateWithSuggestions && selectedIngredients.length > 0) {
+            onGenerateWithSuggestions(selectedIngredients);
         }
     };
     
@@ -105,13 +116,14 @@ export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProp
                         {recipe.additionalSuggestedIngredients.split(',').map((item, index) => {
                             const trimmedItem = item.trim();
                             if (!trimmedItem) return null;
+                            const isSelected = selectedIngredients.includes(trimmedItem);
                            
                            return onGenerateWithSuggestions ? (
                                 <Button 
                                     key={index} 
-                                    variant="outline"
+                                    variant={isSelected ? "secondary" : "outline"}
                                     size="sm" 
-                                    onClick={() => handleSuggestionClick(trimmedItem)}
+                                    onClick={() => handleToggleIngredient(trimmedItem)}
                                     className="h-auto py-1 px-3 text-accent-foreground border-accent hover:bg-accent/10"
                                 >
                                     {trimmedItem}
@@ -121,6 +133,16 @@ export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProp
                            )
                         })}
                     </div>
+                    {onGenerateWithSuggestions && (
+                        <Button 
+                            onClick={handleSearchWithSelected}
+                            disabled={selectedIngredients.length === 0}
+                            className="w-full mt-4"
+                        >
+                            <Search className="mr-2 h-4 w-4" />
+                            Buscar receta con ingredientes seleccionados
+                        </Button>
+                    )}
                 </div>
             </CardFooter>
         </Card>
