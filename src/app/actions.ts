@@ -50,11 +50,12 @@ export async function searchRecipesByQuery(
     }
 
     try {
-        // Generamos 3 recetas para la búsqueda. Usamos el query como si fueran ingredientes.
-        const recipePromises = Array.from({ length: 3 }).map(() =>
-            generateRecipe({ ingredients: query })
-        );
-        const recipes = await Promise.all(recipePromises);
+        const recipes: GenerateRecipeOutput[] = [];
+        // Se generan 3 recetas de forma secuencial para no saturar la API de imágenes.
+        for (let i = 0; i < 3; i++) {
+            const recipe = await generateRecipe({ ingredients: query });
+            recipes.push(recipe);
+        }
         return { recipes, error: null };
     } catch (e) {
         console.error(e);
@@ -62,6 +63,29 @@ export async function searchRecipesByQuery(
         return { recipes: null, error: `No se pudieron buscar las recetas: ${errorMessage}` };
     }
 }
+
+export async function createRecipesByCategory(
+    category: string
+): Promise<{ recipes: GenerateRecipeOutput[] | null; error: string | null; }> {
+    if (!category) {
+        return { recipes: null, error: "Por favor, introduce una categoría." };
+    }
+
+    try {
+        const recipes: GenerateRecipeOutput[] = [];
+        // Se generan 4 recetas de forma secuencial para no saturar la API de imágenes.
+        for (let i = 0; i < 4; i++) {
+            const recipe = await generateRecipe({ category });
+            recipes.push(recipe);
+        }
+        return { recipes, error: null };
+    } catch (e) {
+        console.error(e);
+        const errorMessage = e instanceof Error ? e.message : "Ha ocurrido un error desconocido.";
+        return { recipes: null, error: `No se pudieron generar las recetas para la categoría: ${errorMessage}` };
+    }
+}
+
 
 export async function getSearchSuggestions(
     query: string
