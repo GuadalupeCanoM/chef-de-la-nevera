@@ -193,9 +193,14 @@ export default function FavoritesPage() {
                                     <span>{folder.name} ({recipesByFolderId[folder.id]?.length || 0})</span>
                                      <AlertDialog>
                                         <AlertDialogTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={(e) => e.stopPropagation()}>
+                                            <span 
+                                                role="button"
+                                                aria-label={`Eliminar carpeta ${folder.name}`}
+                                                className="inline-flex items-center justify-center rounded-md text-sm font-medium h-8 w-8 text-destructive hover:bg-destructive/10 transition-colors" 
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
                                                 <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                            </span>
                                         </AlertDialogTrigger>
                                         <AlertDialogContent>
                                             <AlertDialogHeader>
