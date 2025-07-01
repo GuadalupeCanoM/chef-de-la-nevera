@@ -54,7 +54,7 @@ function SearchPageComponent() {
     const handleGenerateWithSuggestions = (ingredients: string[]) => {
         const params = new URLSearchParams();
         params.set('ingredients', ingredients.join(', '));
-        router.push(`/recipe?${params.toString()}`);
+        router.push(`/?${params.toString()}`);
     };
 
     return (

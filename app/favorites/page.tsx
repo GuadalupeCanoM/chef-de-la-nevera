@@ -35,7 +35,7 @@ export default function FavoritesPage() {
     const handleGenerateWithSuggestions = (ingredients: string[]) => {
         const params = new URLSearchParams();
         params.set('ingredients', ingredients.join(', '));
-        router.push(`/recipe?${params.toString()}`);
+        router.push(`/?${params.toString()}`);
     };
 
     const handleCreateFolder = () => {
