@@ -23,7 +23,7 @@ export default function RootLayout({
         {children}
         <Toaster />
         <footer className="text-center p-4 border-t text-sm text-muted-foreground mt-8">
-          Powered by Luprinchef
+          Powered by Guadalupe Cano
         </footer>
       </body>
     </html>
