@@ -17,10 +17,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
-import { createRecipe, identifyIngredientsFromImage } from './actions';
+import { createRecipe, identifyIngredientsFromImage, getAiCategories } from './actions';
 import { RecipeCard } from '@/components/recipe-card';
 import { RecipeSkeleton } from '@/components/recipe-skeleton';
 import { CategoryCard } from '@/components/category-card';
+import type { CategoryOutput } from '@/ai/flows/generate-categories';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const formSchema = z.object({
   ingredients: z.string().min(10, {
@@ -31,7 +33,7 @@ const formSchema = z.object({
   airFryer: z.boolean().default(false).optional(),
 });
 
-const categories = [
+const defaultCategories: CategoryOutput[] = [
     { name: 'Verano', slug: 'verano', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'summer food' },
     { name: 'Ensaladas', slug: 'ensaladas', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'fresh salad' },
     { name: 'Invierno', slug: 'invierno', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'winter soup' },
@@ -48,6 +50,10 @@ function HomeComponent() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
   const searchParams = useSearchParams();
+
+  const [categories, setCategories] = useState<CategoryOutput[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,6 +72,23 @@ function HomeComponent() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [searchParams, form]);
+  
+  useEffect(() => {
+    async function fetchCategories() {
+        setIsLoadingCategories(true);
+        setCategoryError(null);
+        const result = await getAiCategories();
+        if (result.error) {
+            console.error(result.error);
+            setCategoryError(result.error);
+            setCategories(defaultCategories);
+        } else if (result.categories) {
+            setCategories(result.categories);
+        }
+        setIsLoadingCategories(false);
+    }
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     async function getCameraPermission() {
@@ -329,11 +352,30 @@ function HomeComponent() {
         
         <div className="mt-12 w-full">
             <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">O explora por categorías</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                {categories.map((category) => (
-                    <CategoryCard key={category.slug} {...category} />
-                ))}
-            </div>
+             {isLoadingCategories ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <Skeleton className="aspect-square rounded-lg" />
+                    <Skeleton className="aspect-square rounded-lg" />
+                    <Skeleton className="aspect-square rounded-lg" />
+                    <Skeleton className="aspect-square rounded-lg" />
+                </div>
+            ) : (
+                <>
+                {categoryError && (
+                    <Alert variant="destructive" className="mb-4">
+                        <AlertTitle>Error al cargar categorías</AlertTitle>
+                        <AlertDescription>
+                            No se pudieron generar categorías con IA. Mostrando algunas por defecto.
+                        </AlertDescription>
+                    </Alert>
+                )}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    {categories.map((category) => (
+                        <CategoryCard key={category.slug} {...category} />
+                    ))}
+                </div>
+                </>
+            )}
         </div>
 
         <div className="mt-8">
