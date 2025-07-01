@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
-import { createRecipe, identifyIngredientsFromImage, getAiCategories } from './actions';
+import { createRecipe, identifyIngredientsFromImage, getAiCategories, getSearchSuggestions } from './actions';
 import { RecipeCard } from '@/components/recipe-card';
 import { RecipeSkeleton } from '@/components/recipe-skeleton';
 import { CategoryCard } from '@/components/category-card';
@@ -56,6 +56,11 @@ function HomeComponent() {
   const [categories, setCategories] = useState<CategoryOutput[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [categoryError, setCategoryError] = useState<string | null>(null);
+  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,15 +71,50 @@ function HomeComponent() {
       airFryer: false,
     },
   });
-  
-  const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (searchTerm.trim()) {
           router.push(`/search?query=${encodeURIComponent(searchTerm.trim())}`);
+          setSuggestions([]);
       }
   };
+  
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            if (searchTerm.trim().length < 2) {
+                setSuggestions([]);
+                return;
+            }
+
+            setIsSuggesting(true);
+            const result = await getSearchSuggestions(searchTerm);
+            if (result.suggestions) {
+                setSuggestions(result.suggestions);
+            }
+            setIsSuggesting(false);
+        };
+
+        const handler = setTimeout(() => {
+            fetchSuggestions();
+        }, 500);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [searchTerm]);
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+                setSuggestions([]);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [searchContainerRef]);
 
   useEffect(() => {
     const ingredientsFromQuery = searchParams.get('ingredients');
@@ -219,7 +259,7 @@ function HomeComponent() {
             </nav>
         </header>
 
-        <div className="mb-8">
+        <div className="mb-8 relative" ref={searchContainerRef}>
             <form onSubmit={handleSearch} className="relative w-full">
                 <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -228,8 +268,35 @@ function HomeComponent() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
+                    autoComplete="off"
                 />
             </form>
+            {(isSuggesting || suggestions.length > 0) && (
+                <Card className="absolute top-full mt-2 w-full z-10 shadow-lg">
+                    <CardContent className="p-2">
+                        {isSuggesting && !suggestions.length ? (
+                            <p className="p-2 text-sm text-muted-foreground">Buscando sugerencias...</p>
+                        ) : (
+                            <ul className="space-y-1">
+                                {suggestions.map((suggestion) => (
+                                    <li key={suggestion}>
+                                        <button
+                                            className="w-full text-left p-2 rounded-md text-sm hover:bg-accent"
+                                            onClick={() => {
+                                                setSearchTerm(suggestion);
+                                                setSuggestions([]);
+                                                router.push(`/search?query=${encodeURIComponent(suggestion.trim())}`);
+                                            }}
+                                        >
+                                            {suggestion}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </CardContent>
+                </Card>
+            )}
         </div>
 
         <Card className="shadow-lg">

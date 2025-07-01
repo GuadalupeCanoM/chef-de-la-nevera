@@ -3,6 +3,7 @@
 import { generateRecipe, type GenerateRecipeOutput } from "@/ai/flows/generate-recipe";
 import { identifyIngredients } from "@/ai/flows/identify-ingredients-flow";
 import { generateCategories, type CategoryOutput } from "@/ai/flows/generate-categories";
+import { suggestSearchTerms } from "@/ai/flows/suggest-search-terms";
 
 
 export async function createRecipe(
@@ -93,5 +94,22 @@ export async function getAiCategories(): Promise<{ categories: CategoryOutput[] 
         console.error(e);
         const errorMessage = e instanceof Error ? e.message : "Ha ocurrido un error desconocido.";
         return { categories: null, error: `No se pudieron generar las categorías: ${errorMessage}` };
+    }
+}
+
+export async function getSearchSuggestions(
+    query: string
+): Promise<{ suggestions: string[] | null; error: string | null; }> {
+    if (!query || query.length < 2) {
+        return { suggestions: [], error: null };
+    }
+
+    try {
+        const result = await suggestSearchTerms({ query });
+        return { suggestions: result.suggestions, error: null };
+    } catch (e) {
+        console.error(e);
+        const errorMessage = e instanceof Error ? e.message : "Ha ocurrido un error desconocido.";
+        return { suggestions: null, error: `No se pudieron obtener sugerencias: ${errorMessage}` };
     }
 }
