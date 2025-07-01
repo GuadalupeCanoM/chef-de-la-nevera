@@ -65,11 +65,12 @@ export default function Home() {
     }
   }
 
-  const handleIngredientClick = async (ingredient: string) => {
+  const handleGenerateWithSuggestions = async (ingredients: string[]) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    form.setValue('ingredients', ingredient);
+    const joinedIngredients = ingredients.join(', ');
+    form.setValue('ingredients', joinedIngredients);
     await onSubmit({ 
-      ingredients: ingredient, 
+      ingredients: joinedIngredients, 
       vegetarian: form.getValues('vegetarian'), 
       glutenFree: form.getValues('glutenFree') 
     });
@@ -173,7 +174,7 @@ export default function Home() {
 
         <div className="mt-8">
           {isLoading && <RecipeSkeleton />}
-          {recipe && !isLoading && <RecipeCard recipe={recipe} onIngredientClick={handleIngredientClick} />}
+          {recipe && !isLoading && <RecipeCard recipe={recipe} onGenerateWithSuggestions={handleGenerateWithSuggestions} />}
         </div>
       </main>
     </div>
