@@ -49,7 +49,7 @@ function HomeComponent() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       ingredients: "",
-      cuisine: "",
+      cuisine: "any",
       vegetarian: false,
       glutenFree: false,
       airFryer: false,
@@ -177,7 +177,7 @@ function HomeComponent() {
     if (values.vegetarian) params.set('vegetarian', 'true');
     if (values.glutenFree) params.set('glutenFree', 'true');
     if (values.airFryer) params.set('airFryer', 'true');
-    if (values.cuisine) params.set('cuisine', values.cuisine);
+    if (values.cuisine && values.cuisine !== 'any') params.set('cuisine', values.cuisine);
     router.push(`/recipe?${params.toString()}`);
   }
 
@@ -189,7 +189,7 @@ function HomeComponent() {
     if (vegetarian) params.set('vegetarian', 'true');
     if (glutenFree) params.set('glutenFree', 'true');
     if (airFryer) params.set('airFryer', 'true');
-    if (cuisine) params.set('cuisine', cuisine);
+    if (cuisine && cuisine !== 'any') params.set('cuisine', cuisine);
 
     router.push(`/recipe?${params.toString()}`);
   };
@@ -389,14 +389,14 @@ function HomeComponent() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Tipo de Cocina</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Selecciona un tipo de cocina" />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    <SelectItem value="">Cualquiera</SelectItem>
+                                    <SelectItem value="any">Cualquiera</SelectItem>
                                     <SelectItem value="Española">Española</SelectItem>
                                     <SelectItem value="Italiana">Italiana</SelectItem>
                                     <SelectItem value="Mexicana">Mexicana</SelectItem>
