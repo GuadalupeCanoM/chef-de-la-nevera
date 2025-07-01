@@ -13,6 +13,7 @@ import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
 import { Card } from '@/components/ui/card';
 
 const getTitleFromSlug = (slug: string) => {
+    if (!slug) return "";
     return decodeURIComponent(slug).replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
@@ -22,9 +23,12 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
     const [searchTerm, setSearchTerm] = useState('');
     const router = useRouter();
 
-    const categoryName = useMemo(() => getTitleFromSlug(params.slug), [params.slug]);
+    const { slug } = params;
+    const categoryName = useMemo(() => getTitleFromSlug(slug), [slug]);
 
     useEffect(() => {
+        if (!categoryName) return;
+        
         const fetchRecipes = async () => {
             setIsLoading(true);
             setRecipes([]);
