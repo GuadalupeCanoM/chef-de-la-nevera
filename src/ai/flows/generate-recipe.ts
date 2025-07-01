@@ -57,6 +57,7 @@ export async function generateRecipe(input: GenerateRecipeInput): Promise<Genera
 
 const generateRecipePrompt = ai.definePrompt({
   name: 'generateRecipePrompt',
+  model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: GenerateRecipeInputSchema},
   output: {schema: GenerateRecipeOutputSchema.omit({ imageUrl: true })},
   prompt: `Eres un chef español de gran talento. Genera una receta tradicional española. La receta completa, incluyendo todos los campos del JSON, debe estar en español. La receta debe incluir instrucciones paso a paso, donde cada paso es un elemento en una lista numerada y separada por un salto de línea (ej: "1. Picar la cebolla.\\n2. Sofreír el ajo."), una lista de ingredientes con cantidades y el tiempo de cocción estimado. Sugiere ingredientes adicionales que podrían mejorar la receta.
@@ -97,7 +98,7 @@ const generateRecipeFlow = ai.defineFlow(
 
     const {media} = await ai.generate({
         model: 'googleai/gemini-2.0-flash-preview-image-generation',
-        prompt: `A photorealistic, appetizing photo of a freshly prepared dish of ${recipeDetails.recipeName}, ready to be served.`,
+        prompt: `A photorealistic, appetizing photo of ${recipeDetails.recipeName}.`,
         config: {
             responseModalities: ['TEXT', 'IMAGE'],
         },

@@ -32,6 +32,7 @@ export async function suggestMissingIngredients(input: SuggestMissingIngredients
 
 const prompt = ai.definePrompt({
   name: 'suggestMissingIngredientsPrompt',
+  model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: SuggestMissingIngredientsInputSchema},
   output: {schema: SuggestMissingIngredientsOutputSchema},
   prompt: `Dada la siguiente receta e ingredientes disponibles, sugiere una breve lista de ingredientes que falten y que mejorarían significativamente o completarían la receta. Los ingredientes deben ser comunes en la cocina típica española. Devuelve una lista separada por comas y en español. No incluyas cantidades.
