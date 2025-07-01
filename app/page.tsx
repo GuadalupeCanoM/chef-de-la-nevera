@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { identifyIngredientsFromImage, getSearchSuggestions } from '@/app/actions';
+import { identifyIngredientsFromImage, getSearchSuggestions } from './actions';
 
 const formSchema = z.object({
   ingredients: z.string().min(10, {
