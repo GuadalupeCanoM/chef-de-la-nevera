@@ -14,7 +14,12 @@ import {z} from 'genkit';
 const GenerateRecipeInputSchema = z.object({
   ingredients: z
     .string()
+    .optional()
     .describe('A comma-separated list of ingredients available.'),
+  category: z
+    .string()
+    .optional()
+    .describe('The category of the recipe to generate (e.g., "Postres", "Ensaladas").'),
   vegetarian: z.boolean().optional().describe('Whether the recipe should be vegetarian.'),
   glutenFree: z.boolean().optional().describe('Whether the recipe should be gluten-free.'),
   airFryer: z.boolean().optional().describe('Whether the recipe should be for an air fryer.'),
@@ -54,9 +59,17 @@ const generateRecipePrompt = ai.definePrompt({
   name: 'generateRecipePrompt',
   input: {schema: GenerateRecipeInputSchema},
   output: {schema: GenerateRecipeOutputSchema.omit({ imageUrl: true })},
-  prompt: `Eres un chef español de gran talento. Genera una receta tradicional española basada en los ingredientes proporcionados. La receta completa, incluyendo todos los campos del JSON, debe estar en español. La receta debe incluir instrucciones paso a paso, donde cada paso es un elemento en una lista numerada y separada por un salto de línea (ej: "1. Picar la cebolla.\\n2. Sofreír el ajo."), una lista de ingredientes con cantidades y el tiempo de cocción estimado. Sugiere ingredientes adicionales que podrían mejorar la receta.
+  prompt: `Eres un chef español de gran talento. Genera una receta tradicional española. La receta completa, incluyendo todos los campos del JSON, debe estar en español. La receta debe incluir instrucciones paso a paso, donde cada paso es un elemento en una lista numerada y separada por un salto de línea (ej: "1. Picar la cebolla.\\n2. Sofreír el ajo."), una lista de ingredientes con cantidades y el tiempo de cocción estimado. Sugiere ingredientes adicionales que podrían mejorar la receta.
 
-Ingredientes: {{{ingredients}}}
+{{#if category}}
+La receta DEBE pertenecer a la categoría: {{{category}}}.
+{{/if}}
+{{#if ingredients}}
+La receta debe basarse en los siguientes ingredientes: {{{ingredients}}}
+{{else}}
+Puedes inventar los ingredientes para la receta.
+{{/if}}
+
 {{#if vegetarian}}
 La receta DEBE ser vegetariana. No incluyas carne, pollo o pescado.
 {{/if}}

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -19,6 +20,7 @@ import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
 import { createRecipe, identifyIngredientsFromImage } from './actions';
 import { RecipeCard } from '@/components/recipe-card';
 import { RecipeSkeleton } from '@/components/recipe-skeleton';
+import { CategoryCard } from '@/components/category-card';
 
 const formSchema = z.object({
   ingredients: z.string().min(10, {
@@ -29,7 +31,14 @@ const formSchema = z.object({
   airFryer: z.boolean().default(false).optional(),
 });
 
-export default function Home() {
+const categories = [
+    { name: 'Verano', slug: 'verano', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'summer beach' },
+    { name: 'Ensaladas', slug: 'ensaladas', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'salad bowl' },
+    { name: 'Invierno', slug: 'invierno', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'winter stew' },
+    { name: 'Postres', slug: 'postres', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'cake dessert' },
+];
+
+function HomeComponent() {
   const [recipe, setRecipe] = useState<GenerateRecipeOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
@@ -38,6 +47,7 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,6 +58,14 @@ export default function Home() {
       airFryer: false,
     },
   });
+
+  useEffect(() => {
+    const ingredientsFromQuery = searchParams.get('ingredients');
+    if (ingredientsFromQuery) {
+        form.setValue('ingredients', decodeURIComponent(ingredientsFromQuery));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [searchParams, form]);
 
   useEffect(() => {
     async function getCameraPermission() {
@@ -308,6 +326,15 @@ export default function Home() {
             </Form>
           </CardContent>
         </Card>
+        
+        <div className="mt-12 w-full">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">O explora por categorías</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                {categories.map((category) => (
+                    <CategoryCard key={category.slug} {...category} />
+                ))}
+            </div>
+        </div>
 
         <div className="mt-8">
           {isLoading && <RecipeSkeleton />}
@@ -316,4 +343,12 @@ export default function Home() {
       </main>
     </div>
   );
+}
+
+export default function Home() {
+    return (
+        <Suspense fallback={<div>Cargando...</div>}>
+            <HomeComponent />
+        </Suspense>
+    )
 }

@@ -40,3 +40,25 @@ export async function identifyIngredientsFromImage(
         return { ingredients: null, error: `No se pudieron identificar los ingredientes: ${errorMessage}` };
     }
 }
+
+export async function createRecipesByCategory(
+    category: string
+): Promise<{ recipes: GenerateRecipeOutput[] | null; error: string | null; }> {
+    if (!category) {
+        return { recipes: null, error: "Por favor, proporciona una categoría." };
+    }
+
+    try {
+        // Generamos 3 recetas para la categoría
+        const recipePromises = Array.from({ length: 3 }).map(() =>
+            generateRecipe({ category })
+        );
+        
+        const recipes = await Promise.all(recipePromises);
+        return { recipes, error: null };
+    } catch (e) {
+        console.error(e);
+        const errorMessage = e instanceof Error ? e.message : "Ha ocurrido un error desconocido.";
+        return { recipes: null, error: `No se pudieron generar las recetas: ${errorMessage}` };
+    }
+}
