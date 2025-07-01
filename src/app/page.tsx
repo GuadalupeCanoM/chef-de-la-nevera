@@ -67,7 +67,7 @@ export default function Home() {
         <header className="flex justify-between items-center w-full mb-8">
             <h1 className="text-3xl md:text-4xl font-bold font-headline flex items-center gap-3">
                 <ChefHat className="w-10 h-10 text-primary" />
-                Chef de la Nevera
+                Luprinchef
             </h1>
             <nav>
                 <Link href="/favorites" passHref>

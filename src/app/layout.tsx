@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Chef de la Nevera',
+  title: 'Luprinchef',
   description: 'Genera recetas deliciosas con lo que tienes en tu nevera.',
 };
 
@@ -22,6 +22,9 @@ export default function RootLayout({
       <body className="font-body antialiased">
         {children}
         <Toaster />
+        <footer className="text-center p-4 border-t text-sm text-muted-foreground mt-8">
+          Luprinchef® 2024. Todos los derechos reservados.
+        </footer>
       </body>
     </html>
   );
