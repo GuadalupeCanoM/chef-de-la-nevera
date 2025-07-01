@@ -49,8 +49,8 @@ export async function searchRecipesByQuery(
 
     try {
         const recipePromises: Promise<GenerateRecipeOutput>[] = [];
-        // Generate 3 recipes in parallel
-        for (let i = 0; i < 3; i++) {
+        // Generate 2 recipes in parallel to conserve API quota
+        for (let i = 0; i < 2; i++) {
             recipePromises.push(generateRecipe({ ingredients: query }));
         }
         const recipes = await Promise.all(recipePromises);
@@ -71,8 +71,8 @@ export async function createRecipesByCategory(
 
     try {
         const recipePromises: Promise<GenerateRecipeOutput>[] = [];
-        // Generate 4 recipes in parallel
-        for (let i = 0; i < 4; i++) {
+        // Generate 2 recipes in parallel to conserve API quota
+        for (let i = 0; i < 2; i++) {
             recipePromises.push(generateRecipe({ category }));
         }
         const recipes = await Promise.all(recipePromises);

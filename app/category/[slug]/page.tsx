@@ -88,8 +88,6 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                         <RecipeSkeleton />
                         <RecipeSkeleton />
-                        <RecipeSkeleton />
-                        <RecipeSkeleton />
                     </div>
                 ) : filteredRecipes.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
