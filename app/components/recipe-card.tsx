@@ -21,7 +21,7 @@ export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProp
     const isFav = isFavorite(recipe.recipeName);
 
     const parseList = (list: string) => list.split(/\n-? ?/).filter(item => item.trim() !== "");
-    const parseInstructions = (list: string) => list.split(/\n\d+\.? ?/).filter(item => item.trim() !== "");
+    const parseInstructions = (list: string) => (list || '').split(/\n/).map(item => item.trim().replace(/^\d+\.?\s*/, '')).filter(Boolean);
 
     const handleFavoriteClick = () => {
         if (isFav) {
@@ -99,7 +99,7 @@ export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProp
                     <h3 className="text-lg font-semibold mb-3 flex items-center gap-2"><ListOrdered className="h-5 w-5 text-primary"/> Instrucciones</h3>
                     <ol className="list-decimal list-inside space-y-3">
                         {parseInstructions(recipe.instructions).map((item, index) => (
-                            <li key={index}>{item.trim()}</li>
+                            <li key={index}>{item}</li>
                         ))}
                     </ol>
                 </div>
