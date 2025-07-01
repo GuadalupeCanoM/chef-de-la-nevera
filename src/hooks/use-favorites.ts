@@ -48,6 +48,13 @@ export function useFavorites() {
         }
     }, []);
 
+    const updateFavorite = useCallback((recipeName: string, updatedData: Partial<GenerateRecipeOutput>) => {
+        const newFavorites = favorites.map(fav => 
+            fav.recipeName === recipeName ? { ...fav, ...updatedData } : fav
+        );
+        _saveState(newFavorites, folders, recipeFolderMap);
+    }, [favorites, folders, recipeFolderMap, _saveState]);
+
     const addFavorite = useCallback((recipe: GenerateRecipeOutput) => {
         if (favorites.some(f => f.recipeName === recipe.recipeName)) return;
 
@@ -95,5 +102,5 @@ export function useFavorites() {
         _saveState(favorites, newFolders, newMap);
     }, [favorites, folders, recipeFolderMap, _saveState]);
 
-    return { favorites, folders, recipeFolderMap, addFavorite, removeFavorite, isFavorite, createFolder, moveRecipeToFolder, deleteFolder };
+    return { favorites, folders, recipeFolderMap, addFavorite, removeFavorite, isFavorite, createFolder, moveRecipeToFolder, deleteFolder, updateFavorite };
 }

@@ -7,6 +7,7 @@ import type { GenerateRecipeOutput } from "@/ai/flows/generate-recipe";
 import { RecipeModal } from './recipe-modal';
 import { generateRecipeImage } from '@/app/actions';
 import { Skeleton } from './ui/skeleton';
+import { useFavorites } from '@/hooks/use-favorites';
 
 interface FavoriteRecipeCardProps {
     recipe: GenerateRecipeOutput;
@@ -15,11 +16,11 @@ interface FavoriteRecipeCardProps {
 }
 
 export function FavoriteRecipeCard({ recipe, children, onGenerateWithSuggestions }: FavoriteRecipeCardProps) {
+    const { updateFavorite } = useFavorites();
     const [currentRecipe, setCurrentRecipe] = useState(recipe);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // This effect runs when the component mounts and whenever the recipe prop changes.
         setCurrentRecipe(recipe);
         const isPlaceholder = (url: string) => url?.includes('placehold.co');
 
@@ -28,9 +29,8 @@ export function FavoriteRecipeCard({ recipe, children, onGenerateWithSuggestions
             generateRecipeImage(recipe.imageHint)
                 .then(result => {
                     if (result.imageUrl) {
-                        // We use a function form of setCurrentRecipe to get the latest state
-                        // and only update the imageUrl, preserving the rest of the recipe object.
                         setCurrentRecipe(prev => ({ ...prev, imageUrl: result.imageUrl! }));
+                        updateFavorite(recipe.recipeName, { imageUrl: result.imageUrl });
                     }
                 })
                 .finally(() => {
@@ -39,7 +39,7 @@ export function FavoriteRecipeCard({ recipe, children, onGenerateWithSuggestions
         } else {
             setIsLoading(false);
         }
-    }, [recipe]);
+    }, [recipe, updateFavorite]);
 
     return (
         <RecipeModal recipe={currentRecipe} onGenerateWithSuggestions={onGenerateWithSuggestions}>
