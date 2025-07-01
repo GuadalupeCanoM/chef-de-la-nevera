@@ -53,7 +53,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
     const handleGenerateWithSuggestions = (ingredients: string[]) => {
         const params = new URLSearchParams();
         params.set('ingredients', ingredients.join(', '));
-        router.push(`/?${params.toString()}`);
+        router.push(`/recipe?${params.toString()}`);
     };
 
     return (
@@ -93,8 +93,8 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                     </div>
                 ) : filteredRecipes.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                        {filteredRecipes.map((recipe) => (
-                            <FavoriteRecipeCard key={recipe.recipeName} recipe={recipe} onGenerateWithSuggestions={handleGenerateWithSuggestions} />
+                        {filteredRecipes.map((recipe, index) => (
+                            <FavoriteRecipeCard key={`${recipe.recipeName}-${index}`} recipe={recipe} onGenerateWithSuggestions={handleGenerateWithSuggestions} />
                         ))}
                     </div>
                 ) : (
