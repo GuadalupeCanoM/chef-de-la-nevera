@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ChefHat, Sparkles } from 'lucide-react';
+import { ChefHat, Sparkles, BookHeart } from 'lucide-react';
+import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -63,16 +64,27 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center min-h-screen p-4 md:p-8">
       <main className="w-full max-w-2xl">
-        <header className="flex flex-col items-center text-center mb-8">
-          <ChefHat className="w-16 h-16 text-primary mb-2" />
-          <h1 className="text-4xl md:text-5xl font-bold font-headline">Chef de la Nevera</h1>
-          <p className="text-muted-foreground mt-2">¿No sabes qué cocinar? ¡Déjanos ayudarte a crear algo delicioso!</p>
+        <header className="flex justify-between items-center w-full mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold font-headline flex items-center gap-3">
+                <ChefHat className="w-10 h-10 text-primary" />
+                Chef de la Nevera
+            </h1>
+            <nav>
+                <Link href="/favorites" passHref>
+                    <Button variant="ghost">
+                        <BookHeart className="mr-2" />
+                        Favoritos
+                    </Button>
+                </Link>
+            </nav>
         </header>
 
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Tus Ingredientes</CardTitle>
-            <CardDescription>Escribe los ingredientes que tienes, separados por comas o en líneas nuevas.</CardDescription>
+            <CardDescription>
+              ¿No sabes qué cocinar? Escribe los ingredientes que tienes y deja que la magia suceda.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>

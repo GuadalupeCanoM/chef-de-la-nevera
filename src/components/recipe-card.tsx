@@ -1,17 +1,32 @@
+'use client';
+
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { GenerateRecipeOutput } from "@/ai/flows/generate-recipe";
-import { Clock, Leaf, ListOrdered, HeartPulse, PlusCircle, Utensils } from "lucide-react";
+import { Clock, Leaf, ListOrdered, HeartPulse, PlusCircle, Utensils, Heart } from "lucide-react";
 import { Badge } from "./ui/badge";
+import { useFavorites } from "@/hooks/use-favorites";
+import { Button } from "./ui/button";
 
 interface RecipeCardProps {
     recipe: GenerateRecipeOutput;
 }
 
 export function RecipeCard({ recipe }: RecipeCardProps) {
+    const { addFavorite, removeFavorite, isFavorite } = useFavorites();
+    const isFav = isFavorite(recipe.recipeName);
+
     const parseList = (list: string) => list.split(/\n-? ?/).filter(item => item.trim() !== "");
     const parseInstructions = (list: string) => list.split(/\n\d+\.? ?/).filter(item => item.trim() !== "");
+
+    const handleFavoriteClick = () => {
+        if (isFav) {
+            removeFavorite(recipe.recipeName);
+        } else {
+            addFavorite(recipe);
+        }
+    };
     
     return (
         <Card className="animate-in fade-in-50 duration-500 overflow-hidden">
@@ -27,11 +42,24 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
                 </div>
             )}
             <CardHeader>
-                <CardTitle className="text-2xl font-headline flex items-center gap-2"><Utensils className="h-6 w-6 text-primary" /> {recipe.recipeName}</CardTitle>
-                <CardDescription className="flex items-center gap-2 pt-2 text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>{recipe.estimatedCookingTime}</span>
-                </CardDescription>
+                <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1">
+                        <CardTitle className="text-2xl font-headline flex items-center gap-2"><Utensils className="h-6 w-6 text-primary" /> {recipe.recipeName}</CardTitle>
+                        <CardDescription className="flex items-center gap-2 pt-2 text-muted-foreground">
+                            <Clock className="h-4 w-4" />
+                            <span>{recipe.estimatedCookingTime}</span>
+                        </CardDescription>
+                    </div>
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={handleFavoriteClick} 
+                        aria-label="Añadir a favoritos"
+                        className="text-destructive hover:bg-destructive/10 rounded-full flex-shrink-0"
+                    >
+                        <Heart className="h-6 w-6 transition-all" fill={isFav ? 'currentColor' : 'transparent'} />
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent className="space-y-6">
                 <Separator />
