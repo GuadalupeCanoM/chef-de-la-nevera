@@ -1,5 +1,3 @@
-# Firebase Studio
+# Chef de la Nevera
 
-This is a NextJS starter in Firebase Studio.
-
-To get started, take a look at src/app/page.tsx.
+A simple recipe maker that generates recipes based on the ingredients you have in your fridge. Built with Next.js and Genkit.
