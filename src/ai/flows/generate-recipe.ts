@@ -51,14 +51,11 @@ const generateRecipePrompt = ai.definePrompt({
   name: 'generateRecipePrompt',
   input: {schema: GenerateRecipeInputSchema},
   output: {schema: GenerateRecipeOutputSchema.omit({ imageUrl: true })},
-  prompt: `You are a highly skilled Spanish chef. Generate a traditional Spanish recipe based on the ingredients provided. The recipe should include step-by-step instructions, a list of ingredients with quantities, and the estimated cooking time. Suggest additional ingredients that could enhance the recipe.
+  prompt: `Eres un chef español de gran talento. Genera una receta tradicional española basada en los ingredientes proporcionados. La receta completa, incluyendo todos los campos del JSON, debe estar en español. La receta debe incluir instrucciones paso a paso, una lista de ingredientes con cantidades y el tiempo de cocción estimado. Sugiere ingredientes adicionales que podrían mejorar la receta.
 
-Ingredients: {{{ingredients}}}
+Ingredientes: {{{ingredients}}}
 
-
-
-Output the recipe in JSON format. The JSON must include the keys recipeName, ingredientsList, instructions, estimatedCookingTime, additionalSuggestedIngredients and nutritionalInformation.
-`,
+La salida debe ser en formato JSON. El JSON debe incluir las claves recipeName, ingredientsList, instructions, estimatedCookingTime, additionalSuggestedIngredients y nutritionalInformation. Todo el texto en los valores del JSON debe estar en español.`,
 });
 
 const generateRecipeFlow = ai.defineFlow(

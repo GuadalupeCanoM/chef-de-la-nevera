@@ -34,11 +34,11 @@ const prompt = ai.definePrompt({
   name: 'suggestMissingIngredientsPrompt',
   input: {schema: SuggestMissingIngredientsInputSchema},
   output: {schema: SuggestMissingIngredientsOutputSchema},
-  prompt: `Given the following recipe and available ingredients, suggest a short list of missing ingredients that would significantly improve or complete the recipe.  The ingredients should be common in typical Spanish cuisine.  Return a comma separated list. Do not include quantities.
+  prompt: `Dada la siguiente receta e ingredientes disponibles, sugiere una breve lista de ingredientes que falten y que mejorarían significativamente o completarían la receta. Los ingredientes deben ser comunes en la cocina típica española. Devuelve una lista separada por comas y en español. No incluyas cantidades.
 
-Recipe: {{{recipe}}}
+Receta: {{{recipe}}}
 
-Available Ingredients: {{{ingredients}}}`,
+Ingredientes disponibles: {{{ingredients}}}`,
 });
 
 const suggestMissingIngredientsFlow = ai.defineFlow(
