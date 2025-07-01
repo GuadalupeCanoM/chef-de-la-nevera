@@ -19,17 +19,19 @@ function RecipePageComponent() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const ingredients = searchParams.get('ingredients') || '';
-    const vegetarian = searchParams.get('vegetarian') === 'true';
-    const glutenFree = searchParams.get('glutenFree') === 'true';
-    const airFryer = searchParams.get('airFryer') === 'true';
-    const cuisine = searchParams.get('cuisine') || '';
-
     useEffect(() => {
-        if (!searchParams.has('ingredients')) {
+        const ingredients = searchParams.get('ingredients');
+
+        // Redirect if ingredients param is not present or is empty.
+        if (!ingredients) {
             router.push('/');
             return;
         }
+
+        const vegetarian = searchParams.get('vegetarian') === 'true';
+        const glutenFree = searchParams.get('glutenFree') === 'true';
+        const airFryer = searchParams.get('airFryer') === 'true';
+        const cuisine = searchParams.get('cuisine') || '';
 
         const fetchRecipe = async () => {
             setIsLoading(true);
@@ -45,19 +47,20 @@ function RecipePageComponent() {
         };
 
         fetchRecipe();
-    }, [ingredients, vegetarian, glutenFree, airFryer, cuisine, router, searchParams]);
+    }, [searchParams, router]);
 
     const handleGenerateWithSuggestions = (additionalIngredients: string[]) => {
+        const ingredients = searchParams.get('ingredients');
+        if (!ingredients) {
+            router.push('/');
+            return;
+        }
+
         const originalIngredients = ingredients.split(',').map(i => i.trim()).filter(Boolean);
         const newIngredients = [...new Set([...originalIngredients, ...additionalIngredients])];
         
-        const params = new URLSearchParams();
+        const params = new URLSearchParams(searchParams.toString());
         params.set('ingredients', newIngredients.join(', '));
-        
-        if (vegetarian) params.set('vegetarian', 'true');
-        if (glutenFree) params.set('glutenFree', 'true');
-        if (airFryer) params.set('airFryer', 'true');
-        if (cuisine) params.set('cuisine', cuisine);
 
         router.push(`/recipe?${params.toString()}`);
     };
