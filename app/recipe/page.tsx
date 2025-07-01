@@ -23,9 +23,10 @@ function RecipePageComponent() {
     const vegetarian = searchParams.get('vegetarian') === 'true';
     const glutenFree = searchParams.get('glutenFree') === 'true';
     const airFryer = searchParams.get('airFryer') === 'true';
+    const cuisine = searchParams.get('cuisine') || '';
 
     useEffect(() => {
-        if (!ingredients) {
+        if (!searchParams.has('ingredients')) {
             router.push('/');
             return;
         }
@@ -34,7 +35,7 @@ function RecipePageComponent() {
             setIsLoading(true);
             setRecipe(null);
             setError(null);
-            const result = await createRecipe(ingredients, vegetarian, glutenFree, airFryer);
+            const result = await createRecipe(ingredients, vegetarian, glutenFree, airFryer, cuisine);
             if (result.error) {
                 setError(result.error);
             } else {
@@ -44,7 +45,7 @@ function RecipePageComponent() {
         };
 
         fetchRecipe();
-    }, [ingredients, vegetarian, glutenFree, airFryer, router]);
+    }, [ingredients, vegetarian, glutenFree, airFryer, cuisine, router, searchParams]);
 
     const handleGenerateWithSuggestions = (additionalIngredients: string[]) => {
         const originalIngredients = ingredients.split(',').map(i => i.trim()).filter(Boolean);
@@ -56,6 +57,7 @@ function RecipePageComponent() {
         if (vegetarian) params.set('vegetarian', 'true');
         if (glutenFree) params.set('glutenFree', 'true');
         if (airFryer) params.set('airFryer', 'true');
+        if (cuisine) params.set('cuisine', cuisine);
 
         router.push(`/recipe?${params.toString()}`);
     };

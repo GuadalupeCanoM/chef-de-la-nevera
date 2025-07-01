@@ -10,10 +10,11 @@ export async function createRecipe(
     ingredients: string,
     vegetarian?: boolean,
     glutenFree?: boolean,
-    airFryer?: boolean
+    airFryer?: boolean,
+    cuisine?: string
 ): Promise<{ recipe: GenerateRecipeOutput | null; error: string | null; }> {
     try {
-        const recipe = await generateRecipe({ ingredients, vegetarian, glutenFree, airFryer });
+        const recipe = await generateRecipe({ ingredients, vegetarian, glutenFree, airFryer, cuisine });
         return { recipe, error: null };
     } catch (e) {
         console.error(e);

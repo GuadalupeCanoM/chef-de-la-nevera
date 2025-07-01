@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ChefHat, Sparkles, BookHeart, Wind, Camera, Search } from 'lucide-react';
+import { ChefHat, Sparkles, BookHeart, Wind, Camera, Search, Dices } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -18,11 +18,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { identifyIngredientsFromImage, getSearchSuggestions } from '@/app/actions';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formSchema = z.object({
   ingredients: z.string().min(10, {
     message: "Por favor, introduce al menos un ingrediente (mínimo 10 caracteres).",
   }),
+  cuisine: z.string().optional(),
   vegetarian: z.boolean().default(false).optional(),
   glutenFree: z.boolean().default(false).optional(),
   airFryer: z.boolean().default(false).optional(),
@@ -47,6 +49,7 @@ function HomeComponent() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       ingredients: "",
+      cuisine: "",
       vegetarian: false,
       glutenFree: false,
       airFryer: false,
@@ -174,8 +177,22 @@ function HomeComponent() {
     if (values.vegetarian) params.set('vegetarian', 'true');
     if (values.glutenFree) params.set('glutenFree', 'true');
     if (values.airFryer) params.set('airFryer', 'true');
+    if (values.cuisine) params.set('cuisine', values.cuisine);
     router.push(`/recipe?${params.toString()}`);
   }
+
+  const handleRandomRecipe = () => {
+    const params = new URLSearchParams();
+    params.set('ingredients', '');
+    
+    const { vegetarian, glutenFree, airFryer, cuisine } = form.getValues();
+    if (vegetarian) params.set('vegetarian', 'true');
+    if (glutenFree) params.set('glutenFree', 'true');
+    if (airFryer) params.set('airFryer', 'true');
+    if (cuisine) params.set('cuisine', cuisine);
+
+    router.push(`/recipe?${params.toString()}`);
+  };
 
   return (
     <div className="flex flex-col items-center min-h-screen p-4 md:p-8">
@@ -311,7 +328,7 @@ function HomeComponent() {
                 />
 
                 <div className="space-y-4">
-                  <FormDescription>Opciones dietéticas</FormDescription>
+                  <FormDescription>Opciones</FormDescription>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                     <FormField
                       control={form.control}
@@ -366,12 +383,46 @@ function HomeComponent() {
                       )}
                     />
                   </div>
+                   <FormField
+                    control={form.control}
+                    name="cuisine"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Tipo de Cocina</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecciona un tipo de cocina" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="">Cualquiera</SelectItem>
+                                    <SelectItem value="Española">Española</SelectItem>
+                                    <SelectItem value="Italiana">Italiana</SelectItem>
+                                    <SelectItem value="Mexicana">Mexicana</SelectItem>
+                                    <SelectItem value="Japonesa">Japonesa</SelectItem>
+                                    <SelectItem value="India">India</SelectItem>
+                                    <SelectItem value="Tailandesa">Tailandesa</SelectItem>
+                                    <SelectItem value="China">China</SelectItem>
+                                    <SelectItem value="Francesa">Francesa</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                    />
                 </div>
 
-                <Button type="submit" className="w-full">
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Generar Receta
-                </Button>
+                <div className="space-y-2">
+                    <Button type="submit" className="w-full">
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Generar Receta
+                    </Button>
+                     <Button type="button" variant="outline" className="w-full" onClick={handleRandomRecipe}>
+                        <Dices className="mr-2 h-4 w-4" />
+                        Generar receta aleatoria
+                    </Button>
+                </div>
               </form>
             </Form>
           </CardContent>
