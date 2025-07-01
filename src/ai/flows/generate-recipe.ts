@@ -102,7 +102,7 @@ const generateRecipeFlow = ai.defineFlow(
         throw new Error('Could not generate recipe');
     }
 
-    const imageUrl = await generateImageForRecipe(recipeDetails.imageHint);
+    const imageUrl = await generateImageForRecipe(recipeDetails.imageHint || recipeDetails.recipeName);
 
     return {
         ...recipeDetails,
