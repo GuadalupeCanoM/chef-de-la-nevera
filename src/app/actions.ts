@@ -3,6 +3,7 @@
 import { generateRecipe, type GenerateRecipeOutput } from "@/ai/flows/generate-recipe";
 import { identifyIngredients } from "@/ai/flows/identify-ingredients-flow";
 import { suggestSearchTerms } from "@/ai/flows/suggest-search-terms";
+import { generateImageForRecipe as generateImageForRecipeFlow } from "@/ai/flows/generate-recipe-image";
 
 
 export async function createRecipe(
@@ -101,5 +102,22 @@ export async function getSearchSuggestions(
         console.error(e);
         const errorMessage = e instanceof Error ? e.message : "Ha ocurrido un error desconocido.";
         return { suggestions: null, error: `No se pudieron obtener sugerencias: ${errorMessage}` };
+    }
+}
+
+export async function generateRecipeImage(
+    imageHint: string
+): Promise<{ imageUrl: string | null; error: string | null }> {
+    if (!imageHint) {
+        return { imageUrl: null, error: "No image hint provided." };
+    }
+
+    try {
+        const imageUrl = await generateImageForRecipeFlow(imageHint);
+        return { imageUrl, error: null };
+    } catch (e) {
+        console.error(e);
+        const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
+        return { imageUrl: null, error: `Failed to generate image: ${errorMessage}` };
     }
 }
