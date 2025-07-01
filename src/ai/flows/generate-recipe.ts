@@ -83,9 +83,9 @@ La receta DEBE pertenecer a la categoría: {{{category}}}.
 {{/if}}
 {{#if ingredients}}
 La receta debe basarse en los siguientes ingredientes: {{{ingredients}}}
-{{else}}
-Puedes inventar los ingredientes para la receta.
 {{/if}}
+
+Es OBLIGATORIO que la receta se base en los ingredientes o en la categoría proporcionada.
 
 {{#if vegetarian}}
 La receta DEBE ser vegetariana. No incluyas carne, pollo o pescado.
