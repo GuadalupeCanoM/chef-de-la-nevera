@@ -16,23 +16,30 @@ interface FavoriteRecipeCardProps {
 
 export function FavoriteRecipeCard({ recipe, children, onGenerateWithSuggestions }: FavoriteRecipeCardProps) {
     const [currentRecipe, setCurrentRecipe] = useState(recipe);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        // This effect runs when the component mounts and whenever the recipe prop changes.
+        setCurrentRecipe(recipe);
         const isPlaceholder = (url: string) => url?.includes('placehold.co');
 
-        if ((!currentRecipe.imageUrl || isPlaceholder(currentRecipe.imageUrl)) && currentRecipe.imageHint) {
-            const fetchImage = async () => {
-                setIsLoading(true);
-                const result = await generateRecipeImage(currentRecipe.imageHint);
-                if (result.imageUrl) {
-                    setCurrentRecipe(prev => ({ ...prev, imageUrl: result.imageUrl! }));
-                }
-                setIsLoading(false);
-            };
-            fetchImage();
+        if ((!recipe.imageUrl || isPlaceholder(recipe.imageUrl)) && recipe.imageHint) {
+            setIsLoading(true);
+            generateRecipeImage(recipe.imageHint)
+                .then(result => {
+                    if (result.imageUrl) {
+                        // We use a function form of setCurrentRecipe to get the latest state
+                        // and only update the imageUrl, preserving the rest of the recipe object.
+                        setCurrentRecipe(prev => ({ ...prev, imageUrl: result.imageUrl! }));
+                    }
+                })
+                .finally(() => {
+                    setIsLoading(false);
+                });
+        } else {
+            setIsLoading(false);
         }
-    }, [currentRecipe.imageUrl, currentRecipe.imageHint]);
+    }, [recipe]);
 
     return (
         <RecipeModal recipe={currentRecipe} onGenerateWithSuggestions={onGenerateWithSuggestions}>

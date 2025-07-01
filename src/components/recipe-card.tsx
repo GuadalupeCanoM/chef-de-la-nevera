@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -9,6 +9,8 @@ import { Clock, Leaf, ListOrdered, HeartPulse, PlusCircle, Utensils, Heart, Sear
 import { Badge } from "./ui/badge";
 import { useFavorites } from "@/hooks/use-favorites";
 import { Button } from "./ui/button";
+import { generateRecipeImage } from "@/app/actions";
+import { Skeleton } from "./ui/skeleton";
 
 interface RecipeCardProps {
     recipe: GenerateRecipeOutput;
@@ -18,16 +20,38 @@ interface RecipeCardProps {
 export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProps) {
     const { addFavorite, removeFavorite, isFavorite } = useFavorites();
     const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
-    const isFav = isFavorite(recipe.recipeName);
+    const [currentRecipe, setCurrentRecipe] = useState(recipe);
+    const [isImageLoading, setIsImageLoading] = useState(true);
+
+    const isFav = isFavorite(currentRecipe.recipeName);
+
+    useEffect(() => {
+        // When the recipe prop changes, update the state and fetch a new image if needed.
+        setCurrentRecipe(recipe);
+        const isPlaceholder = (url: string) => url?.includes('placehold.co');
+
+        if ((!recipe.imageUrl || isPlaceholder(recipe.imageUrl)) && recipe.imageHint) {
+            setIsImageLoading(true);
+            generateRecipeImage(recipe.imageHint).then(result => {
+                if (result.imageUrl) {
+                    setCurrentRecipe(prev => ({ ...prev, imageUrl: result.imageUrl! }));
+                }
+            }).finally(() => {
+                setIsImageLoading(false);
+            });
+        } else {
+            setIsImageLoading(false);
+        }
+    }, [recipe]);
 
     const parseList = (list: string) => list.split(/\n-? ?/).filter(item => item.trim() !== "");
     const parseInstructions = (list: string) => list.split(/\n\d+\.? ?/).filter(item => item.trim() !== "");
 
     const handleFavoriteClick = () => {
         if (isFav) {
-            removeFavorite(recipe.recipeName);
+            removeFavorite(currentRecipe.recipeName);
         } else {
-            addFavorite(recipe);
+            addFavorite(currentRecipe);
         }
     };
     
@@ -48,24 +72,26 @@ export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProp
     
     return (
         <Card className="animate-in fade-in-50 duration-500 overflow-hidden">
-            {recipe.imageUrl && (
-                <div className="relative w-full aspect-video">
+            <div className="relative w-full aspect-video">
+                {isImageLoading ? (
+                    <Skeleton className="w-full h-full" />
+                ) : (
                     <Image
-                        src={recipe.imageUrl}
-                        alt={`Image of ${recipe.recipeName}`}
+                        src={currentRecipe.imageUrl}
+                        alt={`Image of ${currentRecipe.recipeName}`}
                         fill
                         className="object-cover"
-                        data-ai-hint={recipe.imageHint}
+                        data-ai-hint={currentRecipe.imageHint}
                     />
-                </div>
-            )}
+                )}
+            </div>
             <CardHeader>
                 <div className="flex justify-between items-start gap-4">
                     <div className="flex-1">
-                        <CardTitle className="text-2xl font-headline flex items-center gap-2"><Utensils className="h-6 w-6 text-primary" /> {recipe.recipeName}</CardTitle>
+                        <CardTitle className="text-2xl font-headline flex items-center gap-2"><Utensils className="h-6 w-6 text-primary" /> {currentRecipe.recipeName}</CardTitle>
                         <CardDescription className="flex items-center gap-2 pt-2 text-muted-foreground">
                             <Clock className="h-4 w-4" />
-                            <span>{recipe.estimatedCookingTime}</span>
+                            <span>{currentRecipe.estimatedCookingTime}</span>
                         </CardDescription>
                     </div>
                     <div className="flex flex-col items-center text-center">
@@ -89,7 +115,7 @@ export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProp
                 <div>
                     <h3 className="text-lg font-semibold mb-3 flex items-center gap-2"><Leaf className="h-5 w-5 text-primary"/> Ingredientes</h3>
                     <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                        {parseList(recipe.ingredientsList).map((item, index) => (
+                        {parseList(currentRecipe.ingredientsList).map((item, index) => (
                             <li key={index}>{item}</li>
                         ))}
                     </ul>
@@ -98,7 +124,7 @@ export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProp
                  <div>
                     <h3 className="text-lg font-semibold mb-3 flex items-center gap-2"><ListOrdered className="h-5 w-5 text-primary"/> Instrucciones</h3>
                     <ol className="list-decimal list-inside space-y-3">
-                        {parseInstructions(recipe.instructions).map((item, index) => (
+                        {parseInstructions(currentRecipe.instructions).map((item, index) => (
                             <li key={index}>{item.trim()}</li>
                         ))}
                     </ol>
@@ -106,14 +132,14 @@ export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProp
                 <Separator />
                 <div>
                     <h3 className="text-lg font-semibold mb-3 flex items-center gap-2"><HeartPulse className="h-5 w-5 text-primary"/> Información Nutricional</h3>
-                     <p className="text-muted-foreground">{recipe.nutritionalInformation}</p>
+                     <p className="text-muted-foreground">{currentRecipe.nutritionalInformation}</p>
                 </div>
             </CardContent>
             <CardFooter>
                  <div className="w-full">
                     <h3 className="text-md font-semibold mb-3 flex items-center gap-2"><PlusCircle className="h-5 w-5 text-accent"/> Sugerencias</h3>
                     <div className="flex flex-wrap gap-2">
-                        {recipe.additionalSuggestedIngredients.split(',').map((item, index) => {
+                        {currentRecipe.additionalSuggestedIngredients.split(',').map((item, index) => {
                             const trimmedItem = item.trim();
                             if (!trimmedItem) return null;
                             const isSelected = selectedIngredients.includes(trimmedItem);
@@ -124,7 +150,7 @@ export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProp
                                     variant={isSelected ? "secondary" : "outline"}
                                     size="sm" 
                                     onClick={() => handleToggleIngredient(trimmedItem)}
-                                    className="h-auto py-1 px-3 text-accent-foreground border-accent hover:bg-accent/10"
+                                    className="h-auto py-1 px-3 text-accent-foreground border-accent hover:bg-accent/10 data-[state=selected]:bg-accent"
                                 >
                                     {trimmedItem}
                                 </Button>

@@ -51,12 +51,12 @@ export async function searchRecipesByQuery(
     }
 
     try {
-        const recipes: GenerateRecipeOutput[] = [];
-        // Se generan 3 recetas de forma secuencial para no saturar la API de imágenes.
+        const recipePromises: Promise<GenerateRecipeOutput>[] = [];
+        // Generate 3 recipes in parallel
         for (let i = 0; i < 3; i++) {
-            const recipe = await generateRecipe({ ingredients: query });
-            recipes.push(recipe);
+            recipePromises.push(generateRecipe({ ingredients: query }));
         }
+        const recipes = await Promise.all(recipePromises);
         return { recipes, error: null };
     } catch (e) {
         console.error(e);
@@ -73,12 +73,12 @@ export async function createRecipesByCategory(
     }
 
     try {
-        const recipes: GenerateRecipeOutput[] = [];
-        // Se generan 4 recetas de forma secuencial para no saturar la API de imágenes.
+        const recipePromises: Promise<GenerateRecipeOutput>[] = [];
+        // Generate 4 recipes in parallel
         for (let i = 0; i < 4; i++) {
-            const recipe = await generateRecipe({ category });
-            recipes.push(recipe);
+            recipePromises.push(generateRecipe({ category }));
         }
+        const recipes = await Promise.all(recipePromises);
         return { recipes, error: null };
     } catch (e) {
         console.error(e);

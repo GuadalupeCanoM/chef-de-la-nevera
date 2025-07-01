@@ -101,26 +101,11 @@ const generateRecipeFlow = ai.defineFlow(
         throw new Error('Could not generate recipe');
     }
 
-    let imageUrl = `https://placehold.co/600x400.png`; // Default placeholder
-
-    try {
-      const { media } = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-preview-image-generation',
-        prompt: `a delicious professional photo of ${recipeDetails.imageHint}, spanish cuisine style`,
-        config: {
-          responseModalities: ['TEXT', 'IMAGE'],
-        },
-      });
-      if (media?.url) {
-        imageUrl = media.url;
-      }
-    } catch (e) {
-      console.error("Image generation failed, using placeholder.", e);
-    }
-    
+    // Return placeholder image immediately for speed.
+    // The imageHint can be used by the client to generate the image asynchronously.
     return {
         ...recipeDetails,
-        imageUrl,
+        imageUrl: `https://placehold.co/600x400.png`,
     };
   }
 );
