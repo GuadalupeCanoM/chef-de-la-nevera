@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ChefHat, Sparkles, BookHeart, Wind, Camera, Search } from 'lucide-react';
+import { ChefHat, Sparkles, BookHeart, Wind, Camera, Search, Dices } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -176,6 +176,18 @@ function HomeComponent() {
     if (values.airFryer) params.set('airFryer', 'true');
     router.push(`/recipe?${params.toString()}`);
   }
+
+  const handleRandomRecipe = () => {
+    const params = new URLSearchParams();
+    params.set('ingredients', '');
+    
+    const { vegetarian, glutenFree, airFryer } = form.getValues();
+    if (vegetarian) params.set('vegetarian', 'true');
+    if (glutenFree) params.set('glutenFree', 'true');
+    if (airFryer) params.set('airFryer', 'true');
+
+    router.push(`/recipe?${params.toString()}`);
+  };
 
   return (
     <div className="flex flex-col items-center min-h-screen p-4 md:p-8">
@@ -368,10 +380,16 @@ function HomeComponent() {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full">
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Generar Receta
-                </Button>
+                <div className="space-y-2">
+                    <Button type="submit" className="w-full">
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Generar Receta
+                    </Button>
+                     <Button type="button" variant="outline" className="w-full" onClick={handleRandomRecipe}>
+                        <Dices className="mr-2 h-4 w-4" />
+                        Generar receta aleatoria
+                    </Button>
+                </div>
               </form>
             </Form>
           </CardContent>

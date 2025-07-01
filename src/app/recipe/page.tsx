@@ -25,7 +25,7 @@ function RecipePageComponent() {
     const airFryer = searchParams.get('airFryer') === 'true';
 
     useEffect(() => {
-        if (!ingredients) {
+        if (!searchParams.has('ingredients')) {
             router.push('/');
             return;
         }
@@ -44,7 +44,7 @@ function RecipePageComponent() {
         };
 
         fetchRecipe();
-    }, [ingredients, vegetarian, glutenFree, airFryer, router]);
+    }, [ingredients, vegetarian, glutenFree, airFryer, router, searchParams]);
 
     const handleGenerateWithSuggestions = (additionalIngredients: string[]) => {
         const originalIngredients = ingredients.split(',').map(i => i.trim()).filter(Boolean);

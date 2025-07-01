@@ -12,10 +12,6 @@ export async function createRecipe(
     glutenFree?: boolean,
     airFryer?: boolean
 ): Promise<{ recipe: GenerateRecipeOutput | null; error: string | null; }> {
-    if (!ingredients) {
-        return { recipe: null, error: "Por favor, introduce algunos ingredientes." };
-    }
-
     try {
         const recipe = await generateRecipe({ ingredients, vegetarian, glutenFree, airFryer });
         return { recipe, error: null };
