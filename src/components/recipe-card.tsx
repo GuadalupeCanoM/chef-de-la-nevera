@@ -11,9 +11,10 @@ import { Button } from "./ui/button";
 
 interface RecipeCardProps {
     recipe: GenerateRecipeOutput;
+    onIngredientClick?: (ingredient: string) => void;
 }
 
-export function RecipeCard({ recipe }: RecipeCardProps) {
+export function RecipeCard({ recipe, onIngredientClick }: RecipeCardProps) {
     const { addFavorite, removeFavorite, isFavorite } = useFavorites();
     const isFav = isFavorite(recipe.recipeName);
 
@@ -25,6 +26,12 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
             removeFavorite(recipe.recipeName);
         } else {
             addFavorite(recipe);
+        }
+    };
+    
+    const handleSuggestionClick = (ingredient: string) => {
+        if (onIngredientClick) {
+            onIngredientClick(ingredient.trim());
         }
     };
     
@@ -91,7 +98,19 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
                     <h3 className="text-md font-semibold mb-3 flex items-center gap-2"><PlusCircle className="h-5 w-5 text-accent"/> Sugerencias</h3>
                     <div className="flex flex-wrap gap-2">
                         {recipe.additionalSuggestedIngredients.split(',').map((item, index) => (
-                           <Badge key={index} variant="outline" className="text-accent-foreground border-accent">{item.trim()}</Badge>
+                           onIngredientClick ? (
+                                <Button 
+                                    key={index} 
+                                    variant="outline"
+                                    size="sm" 
+                                    onClick={() => handleSuggestionClick(item)}
+                                    className="h-auto py-1 px-3 text-accent-foreground border-accent hover:bg-accent/10"
+                                >
+                                    {item.trim()}
+                                </Button>
+                           ) : (
+                                <Badge key={index} variant="outline" className="text-accent-foreground border-accent">{item.trim()}</Badge>
+                           )
                         ))}
                     </div>
                 </div>

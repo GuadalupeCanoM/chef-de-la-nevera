@@ -65,6 +65,16 @@ export default function Home() {
     }
   }
 
+  const handleIngredientClick = async (ingredient: string) => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    form.setValue('ingredients', ingredient);
+    await onSubmit({ 
+      ingredients: ingredient, 
+      vegetarian: form.getValues('vegetarian'), 
+      glutenFree: form.getValues('glutenFree') 
+    });
+  }
+
   return (
     <div className="flex flex-col items-center min-h-screen p-4 md:p-8">
       <main className="w-full max-w-2xl">
@@ -163,7 +173,7 @@ export default function Home() {
 
         <div className="mt-8">
           {isLoading && <RecipeSkeleton />}
-          {recipe && !isLoading && <RecipeCard recipe={recipe} />}
+          {recipe && !isLoading && <RecipeCard recipe={recipe} onIngredientClick={handleIngredientClick} />}
         </div>
       </main>
     </div>
