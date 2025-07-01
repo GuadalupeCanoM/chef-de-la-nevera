@@ -16,10 +16,6 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      {
-        protocol: 'data',
-        pathname: '/**',
-      },
     ],
   },
 };
