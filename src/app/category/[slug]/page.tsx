@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -6,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Home, Search } from 'lucide-react';
-import { RecipeCard } from '@/components/recipe-card';
+import { FavoriteRecipeCard } from '@/components/favorite-recipe-card';
 import { RecipeSkeleton } from '@/components/recipe-skeleton';
 import { createRecipesByCategory } from '@/app/actions';
 import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
@@ -18,12 +19,12 @@ const getTitleFromSlug = (slug: string) => {
 }
 
 export default function CategoryPage({ params }: { params: { slug: string } }) {
+    const { slug } = params;
     const [recipes, setRecipes] = useState<GenerateRecipeOutput[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const router = useRouter();
 
-    const { slug } = params;
     const categoryName = useMemo(() => getTitleFromSlug(slug), [slug]);
 
     useEffect(() => {
@@ -83,15 +84,16 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                 </div>
 
                 {isLoading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        <RecipeSkeleton />
                         <RecipeSkeleton />
                         <RecipeSkeleton />
                         <RecipeSkeleton />
                     </div>
                 ) : filteredRecipes.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredRecipes.map((recipe, index) => (
-                            <RecipeCard key={index} recipe={recipe} onGenerateWithSuggestions={handleGenerateWithSuggestions} />
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {filteredRecipes.map((recipe) => (
+                            <FavoriteRecipeCard key={recipe.recipeName} recipe={recipe} onGenerateWithSuggestions={handleGenerateWithSuggestions} />
                         ))}
                     </div>
                 ) : (

@@ -1,15 +1,18 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
 import { useFavorites } from '@/hooks/use-favorites';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Home, BookHeart, Search, FolderPlus, Trash2 } from 'lucide-react';
+import { Home, BookHeart, Search, FolderPlus, Trash2, MoreHorizontal, Folder as FolderIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { FavoriteRecipeCard } from '@/components/favorite-recipe-card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,13 +23,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { Separator } from '@/components/ui/separator';
 
 export default function FavoritesPage() {
-    const { favorites, folders, recipeFolderMap, createFolder, deleteFolder } = useFavorites();
+    const { favorites, folders, recipeFolderMap, createFolder, deleteFolder, moveRecipeToFolder, removeFavorite } = useFavorites();
     const [searchTerm, setSearchTerm] = useState('');
     const [newFolderName, setNewFolderName] = useState('');
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
+    const router = useRouter();
+
+    const handleGenerateWithSuggestions = (ingredients: string[]) => {
+        const ingredientsQuery = encodeURIComponent(ingredients.join(', '));
+        router.push(`/?ingredients=${ingredientsQuery}`);
+    };
 
     const handleCreateFolder = () => {
         if (newFolderName.trim()) {
@@ -60,6 +70,45 @@ export default function FavoritesPage() {
 
         return byFolder;
     }, [filteredFavorites, folders, recipeFolderMap]);
+
+    const renderRecipe = (recipe: any) => (
+         <FavoriteRecipeCard key={recipe.recipeName} recipe={recipe} onGenerateWithSuggestions={handleGenerateWithSuggestions}>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="secondary" size="icon" className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Opciones</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                            <FolderIcon className="mr-2 h-4 w-4" />
+                            <span>Mover a...</span>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                            <DropdownMenuSubContent>
+                                <DropdownMenuItem onClick={() => moveRecipeToFolder(recipe.recipeName, null)}>
+                                    (Sin carpeta)
+                                </DropdownMenuItem>
+                                <Separator />
+                                {folders.map(folder => (
+                                    <DropdownMenuItem key={folder.id} onClick={() => moveRecipeToFolder(recipe.recipeName, folder.id)}>
+                                        <span>{folder.name}</span>
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={() => removeFavorite(recipe.recipeName)}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        <span>Eliminar</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </FavoriteRecipeCard>
+    );
 
     return (
         <div className="flex flex-col items-center min-h-screen p-4 md:p-8">
@@ -130,9 +179,7 @@ export default function FavoritesPage() {
                             <AccordionContent className="p-4 border border-t-0 rounded-b-lg">
                                 {recipesByFolderId['uncategorized']?.length > 0 ? (
                                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                                        {recipesByFolderId['uncategorized'].map((recipe) => (
-                                            <FavoriteRecipeCard key={recipe.recipeName} recipe={recipe} />
-                                        ))}
+                                        {recipesByFolderId['uncategorized'].map(renderRecipe)}
                                     </div>
                                 ) : (
                                     <p className="text-muted-foreground text-center py-4">No hay recetas sin clasificar.</p>
@@ -167,9 +214,7 @@ export default function FavoritesPage() {
                                 <AccordionContent className="p-4 border border-t-0 rounded-b-lg">
                                     {recipesByFolderId[folder.id]?.length > 0 ? (
                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                                            {recipesByFolderId[folder.id].map((recipe) => (
-                                                <FavoriteRecipeCard key={recipe.recipeName} recipe={recipe} />
-                                            ))}
+                                            {recipesByFolderId[folder.id].map(renderRecipe)}
                                         </div>
                                     ) : (
                                         <p className="text-muted-foreground text-center py-4">Esta carpeta está vacía.</p>

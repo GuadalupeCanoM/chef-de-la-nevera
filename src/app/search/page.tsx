@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
@@ -6,7 +7,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Home, Search as SearchIcon } from 'lucide-react';
-import { RecipeCard } from '@/components/recipe-card';
+import { FavoriteRecipeCard } from '@/components/favorite-recipe-card';
 import { RecipeSkeleton } from '@/components/recipe-skeleton';
 import { searchRecipesByQuery } from '@/app/actions';
 import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
@@ -84,15 +85,16 @@ function SearchPageComponent() {
                 </form>
 
                 {isLoading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        <RecipeSkeleton />
                         <RecipeSkeleton />
                         <RecipeSkeleton />
                         <RecipeSkeleton />
                     </div>
                 ) : recipes.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {recipes.map((recipe, index) => (
-                            <RecipeCard key={index} recipe={recipe} onGenerateWithSuggestions={handleGenerateWithSuggestions} />
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {recipes.map((recipe) => (
+                            <FavoriteRecipeCard key={recipe.recipeName} recipe={recipe} onGenerateWithSuggestions={handleGenerateWithSuggestions} />
                         ))}
                     </div>
                 ) : (
