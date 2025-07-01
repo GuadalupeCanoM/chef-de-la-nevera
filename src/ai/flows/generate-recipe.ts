@@ -15,6 +15,8 @@ const GenerateRecipeInputSchema = z.object({
   ingredients: z
     .string()
     .describe('A comma-separated list of ingredients available.'),
+  vegetarian: z.boolean().optional().describe('Whether the recipe should be vegetarian.'),
+  glutenFree: z.boolean().optional().describe('Whether the recipe should be gluten-free.'),
 });
 
 export type GenerateRecipeInput = z.infer<typeof GenerateRecipeInputSchema>;
@@ -54,6 +56,12 @@ const generateRecipePrompt = ai.definePrompt({
   prompt: `Eres un chef español de gran talento. Genera una receta tradicional española basada en los ingredientes proporcionados. La receta completa, incluyendo todos los campos del JSON, debe estar en español. La receta debe incluir instrucciones paso a paso, una lista de ingredientes con cantidades y el tiempo de cocción estimado. Sugiere ingredientes adicionales que podrían mejorar la receta.
 
 Ingredientes: {{{ingredients}}}
+{{#if vegetarian}}
+La receta DEBE ser vegetariana. No incluyas carne, pollo o pescado.
+{{/if}}
+{{#if glutenFree}}
+La receta DEBE ser sin gluten. No incluyas ingredientes que contengan gluten como trigo, cebada o centeno.
+{{/if}}
 
 La salida debe ser en formato JSON. El JSON debe incluir las claves recipeName, ingredientsList, instructions, estimatedCookingTime, additionalSuggestedIngredients y nutritionalInformation. Todo el texto en los valores del JSON debe estar en español.`,
 });

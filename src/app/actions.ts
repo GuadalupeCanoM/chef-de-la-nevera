@@ -2,13 +2,17 @@
 
 import { generateRecipe, type GenerateRecipeOutput } from "@/ai/flows/generate-recipe";
 
-export async function createRecipe(ingredients: string): Promise<{ recipe: GenerateRecipeOutput | null; error: string | null; }> {
+export async function createRecipe(
+    ingredients: string,
+    vegetarian?: boolean,
+    glutenFree?: boolean
+): Promise<{ recipe: GenerateRecipeOutput | null; error: string | null; }> {
     if (!ingredients) {
         return { recipe: null, error: "Por favor, introduce algunos ingredientes." };
     }
 
     try {
-        const recipe = await generateRecipe({ ingredients });
+        const recipe = await generateRecipe({ ingredients, vegetarian, glutenFree });
         return { recipe, error: null };
     } catch (e) {
         console.error(e);

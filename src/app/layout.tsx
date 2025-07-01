@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Luprinchef',
+  title: 'Cocina con Luprinchef',
   description: 'Genera recetas deliciosas con lo que tienes en tu nevera.',
 };
 
@@ -23,7 +23,7 @@ export default function RootLayout({
         {children}
         <Toaster />
         <footer className="text-center p-4 border-t text-sm text-muted-foreground mt-8">
-          Luprinchef® 2024. Todos los derechos reservados.
+          Powered by Luprinchef
         </footer>
       </body>
     </html>

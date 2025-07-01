@@ -22,6 +22,8 @@ const formSchema = z.object({
   ingredients: z.string().min(10, {
     message: "Por favor, introduce al menos un ingrediente (mínimo 10 caracteres).",
   }),
+  vegetarian: z.boolean().default(false).optional(),
+  glutenFree: z.boolean().default(false).optional(),
 });
 
 export default function Home() {
@@ -33,6 +35,8 @@ export default function Home() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       ingredients: "",
+      vegetarian: false,
+      glutenFree: false,
     },
   });
 
@@ -40,7 +44,7 @@ export default function Home() {
     setIsLoading(true);
     setRecipe(null);
     try {
-      const result = await createRecipe(values.ingredients);
+      const result = await createRecipe(values.ingredients, values.vegetarian, values.glutenFree);
       if (result.error) {
         toast({
           variant: "destructive",
@@ -109,27 +113,43 @@ export default function Home() {
                 />
 
                 <div className="space-y-4">
-                    <FormDescription>Opciones dietéticas (próximamente)</FormDescription>
-                    <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-2">
-                            <Checkbox id="vegetarian" disabled />
-                            <label
-                                htmlFor="vegetarian"
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                                Vegetariano
-                            </label>
-                        </div>
-                         <div className="flex items-center space-x-2">
-                            <Checkbox id="gluten-free" disabled />
-                            <label
-                                htmlFor="gluten-free"
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                                Sin Gluten
-                            </label>
-                        </div>
-                    </div>
+                  <FormDescription>Opciones dietéticas</FormDescription>
+                  <div className="flex items-center space-x-4">
+                    <FormField
+                      control={form.control}
+                      name="vegetarian"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-medium">
+                            Vegetariano
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="glutenFree"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-medium">
+                            Sin Gluten
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
