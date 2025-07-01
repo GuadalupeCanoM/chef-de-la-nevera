@@ -32,10 +32,10 @@ const formSchema = z.object({
 });
 
 const categories = [
-    { name: 'Verano', slug: 'verano', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'summer beach' },
-    { name: 'Ensaladas', slug: 'ensaladas', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'salad bowl' },
-    { name: 'Invierno', slug: 'invierno', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'winter stew' },
-    { name: 'Postres', slug: 'postres', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'cake dessert' },
+    { name: 'Verano', slug: 'verano', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'summer food' },
+    { name: 'Ensaladas', slug: 'ensaladas', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'fresh salad' },
+    { name: 'Invierno', slug: 'invierno', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'winter soup' },
+    { name: 'Postres', slug: 'postres', imageUrl: 'https://placehold.co/400x400.png', imageHint: 'sweet dessert' },
 ];
 
 function HomeComponent() {
