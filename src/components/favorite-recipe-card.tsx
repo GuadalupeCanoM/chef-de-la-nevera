@@ -22,7 +22,7 @@ export function FavoriteRecipeCard({ recipe, children, onGenerateWithSuggestions
                         alt={`Image of ${recipe.recipeName}`}
                         fill
                         className="object-cover"
-                        data-ai-hint="recipe food"
+                        data-ai-hint={recipe.imageHint}
                     />
                     {children && (
                          <div onClick={(e) => e.stopPropagation()}>

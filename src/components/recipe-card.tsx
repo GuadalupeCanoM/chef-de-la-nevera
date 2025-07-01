@@ -55,7 +55,7 @@ export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProp
                         alt={`Image of ${recipe.recipeName}`}
                         fill
                         className="object-cover"
-                        data-ai-hint="recipe food"
+                        data-ai-hint={recipe.imageHint}
                     />
                 </div>
             )}

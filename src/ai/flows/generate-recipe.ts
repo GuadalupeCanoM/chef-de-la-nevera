@@ -46,7 +46,12 @@ const GenerateRecipeOutputSchema = z.object({
   nutritionalInformation: z
     .string()
     .describe('Basic nutritional information for the recipe.'),
-  imageUrl: z.string().describe('A data URI of an image of the recipe.'),
+  imageHint: z
+    .string()
+    .describe(
+      'A short, 2-word hint in English for generating an image of the recipe (e.g., "paella seafood").'
+    ),
+  imageUrl: z.string().describe('A URL for an image of the recipe.'),
 });
 
 export type GenerateRecipeOutput = z.infer<typeof GenerateRecipeOutputSchema>;
@@ -60,7 +65,7 @@ const generateRecipePrompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: GenerateRecipeInputSchema},
   output: {schema: GenerateRecipeOutputSchema.omit({ imageUrl: true })},
-  prompt: `Eres un chef español de gran talento. Genera una receta tradicional española. La receta completa, incluyendo todos los campos del JSON, debe estar en español. La receta debe incluir instrucciones paso a paso, donde cada paso es un elemento en una lista numerada y separada por un salto de línea (ej: "1. Picar la cebolla.\\n2. Sofreír el ajo."), una lista de ingredientes con cantidades y el tiempo de cocción estimado. Sugiere ingredientes adicionales que podrían mejorar la receta.
+  prompt: `Eres un chef español de gran talento. Genera una receta tradicional española. La receta completa, incluyendo todos los campos del JSON, debe estar en español. La receta debe incluir instrucciones paso a paso, donde cada paso es un elemento en una lista numerada y separada por un salto de línea (ej: "1. Picar la cebolla.\\n2. Sofreír el ajo."), una lista de ingredientes con cantidades, el tiempo de cocción estimado y una pista de 2 palabras en inglés para generar una imagen de la receta. Sugiere ingredientes adicionales que podrían mejorar la receta.
 
 {{#if category}}
 La receta DEBE pertenecer a la categoría: {{{category}}}.
@@ -81,7 +86,7 @@ La receta DEBE ser sin gluten. No incluyas ingredientes que contengan gluten com
 La receta DEBE ser para una freidora de aire (air fryer).
 {{/if}}
 
-La salida debe ser en formato JSON. El JSON debe incluir las claves recipeName, ingredientsList, instructions, estimatedCookingTime, additionalSuggestedIngredients y nutritionalInformation. Todo el texto en los valores del JSON debe estar en español.`,
+La salida debe ser en formato JSON. El JSON debe incluir las claves recipeName, ingredientsList, instructions, estimatedCookingTime, additionalSuggestedIngredients, nutritionalInformation y imageHint. Todo el texto en los valores del JSON debe estar en español.`,
 });
 
 const generateRecipeFlow = ai.defineFlow(
@@ -96,17 +101,11 @@ const generateRecipeFlow = ai.defineFlow(
         throw new Error('Could not generate recipe');
     }
 
-    const {media} = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-preview-image-generation',
-        prompt: `A photorealistic, appetizing photo of ${recipeDetails.recipeName}.`,
-        config: {
-            responseModalities: ['TEXT', 'IMAGE'],
-        },
-    });
-
+    // Return placeholder image immediately for speed.
+    // The imageHint can be used later to generate images asynchronously or by a background job.
     return {
         ...recipeDetails,
-        imageUrl: media?.url ?? '',
+        imageUrl: `https://placehold.co/600x400.png`,
     };
   }
 );
