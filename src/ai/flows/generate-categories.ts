@@ -53,8 +53,10 @@ const generateCategoriesFlow = ai.defineFlow(
     if (!categorySuggestions) {
         throw new Error('Could not generate category suggestions.');
     }
+    
+    const categoriesWithImages: CategoryOutput[] = [];
 
-    const imageGenerationPromises = categorySuggestions.map(async (category) => {
+    for (const category of categorySuggestions) {
         const { media } = await ai.generate({
             model: 'googleai/gemini-2.0-flash-preview-image-generation',
             prompt: `A vibrant, photorealistic, and appetizing photo representing the spanish food category: "${category.name}". The photo should be beautiful and look professionally taken. Image hint: ${category.imageHint}`,
@@ -63,13 +65,12 @@ const generateCategoriesFlow = ai.defineFlow(
             },
         });
 
-        return {
+        categoriesWithImages.push({
             ...category,
             imageUrl: media?.url ?? `https://placehold.co/400x400.png`,
-        };
-    });
+        });
+    }
 
-    const categoriesWithImages = await Promise.all(imageGenerationPromises);
     return categoriesWithImages;
   }
 );
