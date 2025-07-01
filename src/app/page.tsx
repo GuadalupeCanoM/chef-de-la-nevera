@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ChefHat, Sparkles, BookHeart, Wind, Camera, Search, AlertTriangle } from 'lucide-react';
+import { ChefHat, Sparkles, BookHeart, Wind, Camera, Search } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -17,10 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { identifyIngredientsFromImage, getSearchSuggestions, createRecipe } from '@/app/actions';
-import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
-import { RecipeCard } from '@/components/recipe-card';
-import { RecipeSkeleton } from '@/components/recipe-skeleton';
+import { identifyIngredientsFromImage, getSearchSuggestions } from '@/app/actions';
 
 const formSchema = z.object({
   ingredients: z.string().min(10, {
@@ -32,10 +29,6 @@ const formSchema = z.object({
 });
 
 function HomeComponent() {
-  const [recipe, setRecipe] = useState<GenerateRecipeOutput | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
   const [isScanning, setIsScanning] = useState(false);
   const [isCameraDialogOpen, setIsCameraDialogOpen] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -49,7 +42,6 @@ function HomeComponent() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isSuggesting, setIsSuggesting] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
-  const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -177,31 +169,13 @@ function HomeComponent() {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    setRecipe(null);
-    setError(null);
-
-    // Give a moment for the state to update before scrolling
-    setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-
-    const result = await createRecipe(values.ingredients, values.vegetarian, values.glutenFree, values.airFryer);
-
-    if (result.error) {
-        setError(result.error);
-    } else {
-        setRecipe(result.recipe);
-    }
-    setIsLoading(false);
+    const params = new URLSearchParams();
+    params.set('ingredients', values.ingredients);
+    if (values.vegetarian) params.set('vegetarian', 'true');
+    if (values.glutenFree) params.set('glutenFree', 'true');
+    if (values.airFryer) params.set('airFryer', 'true');
+    router.push(`/recipe?${params.toString()}`);
   }
-
-  const handleGenerateWithSuggestions = (newIngredients: string[]) => {
-    form.setValue('ingredients', newIngredients.join(', '));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Trigger form submission
-    form.handleSubmit(onSubmit)();
-  };
 
   return (
     <div className="flex flex-col items-center min-h-screen p-4 md:p-8">
@@ -394,46 +368,14 @@ function HomeComponent() {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                        <Sparkles className="mr-2 h-4 w-4 animate-spin" />
-                        Generando...
-                    </>
-                  ) : (
-                    <>
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Generar Receta
-                    </>
-                  )}
+                <Button type="submit" className="w-full">
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Generar Receta
                 </Button>
               </form>
             </Form>
           </CardContent>
         </Card>
-        
-        <div ref={resultsRef} className="mt-8 w-full">
-            {isLoading && <RecipeSkeleton />}
-            {error && !isLoading && (
-                 <Card>
-                    <CardHeader>
-                        <CardTitle className="text-destructive flex items-center gap-2">
-                            <AlertTriangle />
-                            Error al generar la receta
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground">{error}</p>
-                        <Button variant="outline" className="mt-4" onClick={() => form.handleSubmit(onSubmit)()}>
-                            Intentar de nuevo
-                        </Button>
-                    </CardContent>
-                </Card>
-            )}
-            {recipe && !isLoading && !error && (
-                <RecipeCard recipe={recipe} onGenerateWithSuggestions={handleGenerateWithSuggestions} />
-            )}
-        </div>
       </main>
     </div>
   );
