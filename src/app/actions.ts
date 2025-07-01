@@ -64,6 +64,27 @@ export async function createRecipesByCategory(
     }
 }
 
+export async function searchRecipesByQuery(
+    query: string
+): Promise<{ recipes: GenerateRecipeOutput[] | null; error: string | null; }> {
+    if (!query) {
+        return { recipes: null, error: "Por favor, introduce un término de búsqueda." };
+    }
+
+    try {
+        // Generamos 3 recetas para la búsqueda. Usamos el query como si fueran ingredientes.
+        const recipePromises = Array.from({ length: 3 }).map(() =>
+            generateRecipe({ ingredients: query })
+        );
+        const recipes = await Promise.all(recipePromises);
+        return { recipes, error: null };
+    } catch (e) {
+        console.error(e);
+        const errorMessage = e instanceof Error ? e.message : "Ha ocurrido un error desconocido.";
+        return { recipes: null, error: `No se pudieron buscar las recetas: ${errorMessage}` };
+    }
+}
+
 export async function getAiCategories(): Promise<{ categories: CategoryOutput[] | null; error: string | null; }> {
     try {
         const categories = await generateCategories();

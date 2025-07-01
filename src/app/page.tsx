@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useRef, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ChefHat, Sparkles, BookHeart, Wind, Camera } from 'lucide-react';
+import { ChefHat, Sparkles, BookHeart, Wind, Camera, Search } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
@@ -50,6 +51,7 @@ function HomeComponent() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [categories, setCategories] = useState<CategoryOutput[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
@@ -64,6 +66,15 @@ function HomeComponent() {
       airFryer: false,
     },
   });
+  
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (searchTerm.trim()) {
+          router.push(`/search?query=${encodeURIComponent(searchTerm.trim())}`);
+      }
+  };
 
   useEffect(() => {
     const ingredientsFromQuery = searchParams.get('ingredients');
@@ -207,6 +218,19 @@ function HomeComponent() {
                 </Link>
             </nav>
         </header>
+
+        <div className="mb-8">
+            <form onSubmit={handleSearch} className="relative w-full">
+                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                    type="text"
+                    placeholder="Buscar recetas por nombre o ingredientes..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                />
+            </form>
+        </div>
 
         <Card className="shadow-lg">
           <CardHeader>
