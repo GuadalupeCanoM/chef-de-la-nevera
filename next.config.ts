@@ -18,6 +18,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    // Esto es necesario para permitir peticiones desde el entorno de desarrollo (Firebase Studio).
+    allowedDevOrigins: [
+        "https://*.cloudworkstations.dev",
+        "https://*.web.app",
+        "https://*.firebaseapp.com"
+    ],
+  },
 };
 
 export default nextConfig;
