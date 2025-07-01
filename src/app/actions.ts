@@ -2,7 +2,6 @@
 
 import { generateRecipe, type GenerateRecipeOutput } from "@/ai/flows/generate-recipe";
 import { identifyIngredients } from "@/ai/flows/identify-ingredients-flow";
-import { generateCategories, type CategoryOutput } from "@/ai/flows/generate-categories";
 import { suggestSearchTerms } from "@/ai/flows/suggest-search-terms";
 
 
@@ -43,28 +42,6 @@ export async function identifyIngredientsFromImage(
     }
 }
 
-export async function createRecipesByCategory(
-    category: string
-): Promise<{ recipes: GenerateRecipeOutput[] | null; error: string | null; }> {
-    if (!category) {
-        return { recipes: null, error: "Por favor, proporciona una categoría." };
-    }
-
-    try {
-        // Generamos 3 recetas para la categoría
-        const recipePromises = Array.from({ length: 3 }).map(() =>
-            generateRecipe({ category })
-        );
-        
-        const recipes = await Promise.all(recipePromises);
-        return { recipes, error: null };
-    } catch (e) {
-        console.error(e);
-        const errorMessage = e instanceof Error ? e.message : "Ha ocurrido un error desconocido.";
-        return { recipes: null, error: `No se pudieron generar las recetas: ${errorMessage}` };
-    }
-}
-
 export async function searchRecipesByQuery(
     query: string
 ): Promise<{ recipes: GenerateRecipeOutput[] | null; error: string | null; }> {
@@ -83,17 +60,6 @@ export async function searchRecipesByQuery(
         console.error(e);
         const errorMessage = e instanceof Error ? e.message : "Ha ocurrido un error desconocido.";
         return { recipes: null, error: `No se pudieron buscar las recetas: ${errorMessage}` };
-    }
-}
-
-export async function getAiCategories(): Promise<{ categories: CategoryOutput[] | null; error: string | null; }> {
-    try {
-        const categories = await generateCategories();
-        return { categories, error: null };
-    } catch (e) {
-        console.error(e);
-        const errorMessage = e instanceof Error ? e.message : "Ha ocurrido un error desconocido.";
-        return { categories: null, error: `No se pudieron generar las categorías: ${errorMessage}` };
     }
 }
 
