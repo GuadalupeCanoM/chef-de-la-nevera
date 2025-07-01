@@ -17,6 +17,7 @@ const GenerateRecipeInputSchema = z.object({
     .describe('A comma-separated list of ingredients available.'),
   vegetarian: z.boolean().optional().describe('Whether the recipe should be vegetarian.'),
   glutenFree: z.boolean().optional().describe('Whether the recipe should be gluten-free.'),
+  airFryer: z.boolean().optional().describe('Whether the recipe should be for an air fryer.'),
 });
 
 export type GenerateRecipeInput = z.infer<typeof GenerateRecipeInputSchema>;
@@ -61,6 +62,9 @@ La receta DEBE ser vegetariana. No incluyas carne, pollo o pescado.
 {{/if}}
 {{#if glutenFree}}
 La receta DEBE ser sin gluten. No incluyas ingredientes que contengan gluten como trigo, cebada o centeno.
+{{/if}}
+{{#if airFryer}}
+La receta DEBE ser para una freidora de aire (air fryer).
 {{/if}}
 
 La salida debe ser en formato JSON. El JSON debe incluir las claves recipeName, ingredientsList, instructions, estimatedCookingTime, additionalSuggestedIngredients y nutritionalInformation. Todo el texto en los valores del JSON debe estar en español.`,

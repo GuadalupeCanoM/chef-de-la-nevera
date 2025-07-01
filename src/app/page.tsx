@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ChefHat, Sparkles, BookHeart } from 'lucide-react';
+import { ChefHat, Sparkles, BookHeart, Wind } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ const formSchema = z.object({
   }),
   vegetarian: z.boolean().default(false).optional(),
   glutenFree: z.boolean().default(false).optional(),
+  airFryer: z.boolean().default(false).optional(),
 });
 
 export default function Home() {
@@ -37,6 +38,7 @@ export default function Home() {
       ingredients: "",
       vegetarian: false,
       glutenFree: false,
+      airFryer: false,
     },
   });
 
@@ -44,7 +46,7 @@ export default function Home() {
     setIsLoading(true);
     setRecipe(null);
     try {
-      const result = await createRecipe(values.ingredients, values.vegetarian, values.glutenFree);
+      const result = await createRecipe(values.ingredients, values.vegetarian, values.glutenFree, values.airFryer);
       if (result.error) {
         toast({
           variant: "destructive",
@@ -72,7 +74,8 @@ export default function Home() {
     await onSubmit({ 
       ingredients: joinedIngredients, 
       vegetarian: form.getValues('vegetarian'), 
-      glutenFree: form.getValues('glutenFree') 
+      glutenFree: form.getValues('glutenFree'),
+      airFryer: form.getValues('airFryer'),
     });
   }
 
@@ -125,7 +128,7 @@ export default function Home() {
 
                 <div className="space-y-4">
                   <FormDescription>Opciones dietéticas</FormDescription>
-                  <div className="flex items-center space-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                     <FormField
                       control={form.control}
                       name="vegetarian"
@@ -156,6 +159,24 @@ export default function Home() {
                           </FormControl>
                           <FormLabel className="font-medium">
                             Sin Gluten
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="airFryer"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                           <FormLabel className="font-medium flex items-center gap-2">
+                            <Wind className="w-4 h-4" />
+                            Freidora de Aire
                           </FormLabel>
                         </FormItem>
                       )}

@@ -5,14 +5,15 @@ import { generateRecipe, type GenerateRecipeOutput } from "@/ai/flows/generate-r
 export async function createRecipe(
     ingredients: string,
     vegetarian?: boolean,
-    glutenFree?: boolean
+    glutenFree?: boolean,
+    airFryer?: boolean
 ): Promise<{ recipe: GenerateRecipeOutput | null; error: string | null; }> {
     if (!ingredients) {
         return { recipe: null, error: "Por favor, introduce algunos ingredientes." };
     }
 
     try {
-        const recipe = await generateRecipe({ ingredients, vegetarian, glutenFree });
+        const recipe = await generateRecipe({ ingredients, vegetarian, glutenFree, airFryer });
         return { recipe, error: null };
     } catch (e) {
         console.error(e);
