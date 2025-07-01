@@ -3,3 +3,4 @@ config();
 
 import '@/ai/flows/suggest-missing-ingredients.ts';
 import '@/ai/flows/generate-recipe.ts';
+import '@/ai/flows/identify-ingredients-flow.ts';

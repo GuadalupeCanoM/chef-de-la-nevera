@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ChefHat, Sparkles, BookHeart, Wind } from 'lucide-react';
+import { ChefHat, Sparkles, BookHeart, Wind, Camera } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -12,9 +12,11 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
-import { createRecipe } from './actions';
+import { createRecipe, identifyIngredientsFromImage } from './actions';
 import { RecipeCard } from '@/components/recipe-card';
 import { RecipeSkeleton } from '@/components/recipe-skeleton';
 
@@ -30,6 +32,11 @@ const formSchema = z.object({
 export default function Home() {
   const [recipe, setRecipe] = useState<GenerateRecipeOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [isCameraDialogOpen, setIsCameraDialogOpen] = useState(false);
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -41,6 +48,69 @@ export default function Home() {
       airFryer: false,
     },
   });
+
+  useEffect(() => {
+    async function getCameraPermission() {
+      if (!isCameraDialogOpen) return;
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        setHasCameraPermission(true);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (error) {
+        console.error('Error al acceder a la cámara:', error);
+        setHasCameraPermission(false);
+        toast({
+          variant: 'destructive',
+          title: 'Acceso a la cámara denegado',
+          description: 'Por favor, activa los permisos de cámara en tu navegador.',
+        });
+      }
+    }
+
+    getCameraPermission();
+
+    return () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [isCameraDialogOpen, toast]);
+
+  async function handleAnalyzeIngredients() {
+    if (!videoRef.current || !canvasRef.current || !hasCameraPermission) return;
+
+    setIsScanning(true);
+    
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    if(context) {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageDataUri = canvas.toDataURL('image/jpeg');
+
+      try {
+        const result = await identifyIngredientsFromImage(imageDataUri);
+        if (result.error) {
+          toast({ variant: "destructive", title: "Error al analizar", description: result.error });
+        } else if (result.ingredients) {
+          const currentIngredients = form.getValues('ingredients');
+          form.setValue('ingredients', [currentIngredients, result.ingredients].filter(Boolean).join(', '));
+          toast({ title: "¡Ingredientes añadidos!", description: "Hemos añadido los ingredientes de la imagen." });
+          setIsCameraDialogOpen(false);
+        }
+      } catch (error) {
+         toast({ variant: "destructive", title: "Error inesperado", description: "No se pudieron identificar los ingredientes." });
+      }
+    }
+
+    setIsScanning(false);
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -99,9 +169,55 @@ export default function Home() {
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Tus Ingredientes</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle>Tus Ingredientes</CardTitle>
+              <Dialog open={isCameraDialogOpen} onOpenChange={setIsCameraDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Camera className="h-5 w-5" />
+                    <span className="sr-only">Escanear con la cámara</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[625px]">
+                  <DialogHeader>
+                    <DialogTitle>Escanear ingredientes</DialogTitle>
+                    <DialogDescription>
+                      Apunta con la cámara al interior de tu nevera. Cuando tengas una buena vista, pulsa "Analizar Ingredientes".
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="relative">
+                    <video ref={videoRef} className="w-full aspect-video rounded-md bg-muted" autoPlay muted playsInline />
+                    <canvas ref={canvasRef} className="hidden" />
+                    {hasCameraPermission === false && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-md">
+                        <Alert variant="destructive" className="w-auto">
+                           <AlertTitle>Cámara no disponible</AlertTitle>
+                           <AlertDescription>Por favor, concede permisos de cámara en tu navegador.</AlertDescription>
+                        </Alert>
+                      </div>
+                    )}
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsCameraDialogOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleAnalyzeIngredients} disabled={isScanning || hasCameraPermission === false}>
+                      {isScanning ? (
+                        <>
+                          <Sparkles className="mr-2 h-4 w-4 animate-spin" />
+                          Analizando...
+                        </>
+                      ) : (
+                        <>
+                          <Camera className="mr-2 h-4 w-4" />
+                          Analizar Ingredientes
+                        </>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
             <CardDescription>
-              ¿No sabes qué cocinar? Escribe los ingredientes que tienes y deja que la magia suceda.
+              ¿No sabes qué cocinar? Escribe los ingredientes que tienes o usa la cámara para escanear tu nevera.
             </CardDescription>
           </CardHeader>
           <CardContent>
