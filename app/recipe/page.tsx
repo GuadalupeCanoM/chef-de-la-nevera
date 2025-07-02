@@ -13,7 +13,6 @@ import Link from 'next/link';
 import { Home } from 'lucide-react';
 import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { AuthButton } from '@/components/auth-button';
 
 function RecipePageComponent() {
     const router = useRouter();
@@ -83,7 +82,6 @@ function RecipePageComponent() {
                                 Inicio
                             </Button>
                         </Link>
-                        <AuthButton />
                     </nav>
                 </header>
 

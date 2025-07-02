@@ -21,7 +21,6 @@ import { useToast } from '@/hooks/use-toast';
 import { identifyIngredientsFromImage, getSearchSuggestions } from '@/app/actions';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { AuthButton } from '@/components/auth-button';
 
 const formSchema = z.object({
   ingredients: z.string().min(10, {
@@ -200,7 +199,6 @@ function HomeComponent() {
                         Favoritos
                     </Button>
                 </Link>
-                <AuthButton />
             </nav>
         </header>
 

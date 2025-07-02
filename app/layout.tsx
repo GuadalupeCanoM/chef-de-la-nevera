@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import '@/app/globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from '@/components/theme-provider';
-import { AuthProvider } from '@/hooks/use-auth';
 
 export const metadata: Metadata = {
   title: 'Cocina con Luprinchef',
@@ -28,13 +27,11 @@ export default function RootLayout({
           defaultTheme="dark"
           disableTransitionOnChange
         >
-          <AuthProvider>
-            {children}
-            <Toaster />
-            <footer className="text-center p-4 border-t text-sm text-muted-foreground mt-8">
-              Powered by Guadalupe Cano
-            </footer>
-          </AuthProvider>
+          {children}
+          <Toaster />
+          <footer className="text-center p-4 border-t text-sm text-muted-foreground mt-8">
+            Powered by Guadalupe Cano
+          </footer>
         </ThemeProvider>
       </body>
     </html>
