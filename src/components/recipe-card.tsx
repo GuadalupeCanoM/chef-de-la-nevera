@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -9,6 +10,8 @@ import { Clock, Leaf, ListOrdered, HeartPulse, PlusCircle, Utensils, Heart, Sear
 import { Badge } from "./ui/badge";
 import { useFavorites } from "@/hooks/use-favorites";
 import { Button } from "./ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 
 interface RecipeCardProps {
     recipe: GenerateRecipeOutput;
@@ -16,8 +19,10 @@ interface RecipeCardProps {
 }
 
 export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProps) {
+    const { user, signInWithGoogle } = useAuth();
     const { addFavorite, removeFavorite, isFavorite } = useFavorites();
     const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
+    const { toast } = useToast();
     
     const isFav = isFavorite(recipe.recipeName);
 
@@ -25,6 +30,15 @@ export function RecipeCard({ recipe, onGenerateWithSuggestions }: RecipeCardProp
     const parseInstructions = (list: string) => (list || '').split(/\n/).map(item => item.trim().replace(/^\d+\.?\s*/, '')).filter(Boolean);
 
     const handleFavoriteClick = () => {
+        if (!user) {
+            toast({
+                title: 'Inicia sesión para guardar',
+                description: 'Necesitas una cuenta para guardar tus recetas favoritas.',
+                action: <Button onClick={signInWithGoogle}>Iniciar sesión</Button>
+            });
+            return;
+        }
+        
         if (isFav) {
             removeFavorite(recipe.recipeName);
         } else {

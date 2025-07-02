@@ -13,6 +13,7 @@ import { createRecipesByCategory } from '@/app/actions';
 import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
 import { Card } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { AuthButton } from '@/components/auth-button';
 
 const getTitleFromSlug = (slug: string) => {
     if (!slug) return "";
@@ -72,6 +73,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                                 Inicio
                             </Button>
                         </Link>
+                        <AuthButton />
                     </nav>
                 </header>
 

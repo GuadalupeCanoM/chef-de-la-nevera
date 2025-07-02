@@ -13,6 +13,7 @@ import { searchRecipesByQuery } from '@/app/actions';
 import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
 import { Card } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { AuthButton } from '@/components/auth-button';
 
 function SearchPageComponent() {
     const searchParams = useSearchParams();
@@ -73,6 +74,7 @@ function SearchPageComponent() {
                                 Inicio
                             </Button>
                         </Link>
+                        <AuthButton />
                     </nav>
                 </header>
 
