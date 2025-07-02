@@ -21,4 +21,4 @@ Vite
 API de Edamam / Spoonacular (u otra, si quieres especificarla)
 
 💡 Objetivo
-Fomentar el aprovechamiento de alimentos, facilitar la planificación de comidas y ayudar a personas con pocos ingredientes a cocinar de forma sencilla y creativa.
+Fomentar el aprovechamiento de alimentos, facilitar la planificación de comidas y ayudar a personas con pocos ingredientes a cocinar de forma sencilla y creativa
