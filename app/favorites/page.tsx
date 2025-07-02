@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -24,6 +25,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Separator } from '@/components/ui/separator';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function FavoritesPage() {
     const { favorites, folders, recipeFolderMap, createFolder, deleteFolder, moveRecipeToFolder, removeFavorite } = useFavorites();
@@ -118,7 +120,8 @@ export default function FavoritesPage() {
                         <BookHeart className="w-10 h-10 text-primary" />
                         Recetas Favoritas
                     </h1>
-                    <nav>
+                    <nav className="flex items-center gap-2">
+                        <ThemeToggle />
                         <Link href="/" passHref>
                             <Button variant="ghost">
                                 <Home className="mr-2" />

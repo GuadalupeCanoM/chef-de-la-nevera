@@ -12,6 +12,7 @@ import { RecipeSkeleton } from '@/components/recipe-skeleton';
 import { searchRecipesByQuery } from '@/app/actions';
 import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
 import { Card } from '@/components/ui/card';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 function SearchPageComponent() {
     const searchParams = useSearchParams();
@@ -64,7 +65,8 @@ function SearchPageComponent() {
                     <h1 className="text-3xl md:text-4xl font-bold font-headline capitalize">
                        Resultados para "{query}"
                     </h1>
-                    <nav>
+                    <nav className="flex items-center gap-2">
+                        <ThemeToggle />
                         <Link href="/" passHref>
                             <Button variant="ghost">
                                 <Home className="mr-2" />
