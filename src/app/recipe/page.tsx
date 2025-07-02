@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
@@ -11,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Home } from 'lucide-react';
 import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 function RecipePageComponent() {
     const router = useRouter();
@@ -72,7 +74,8 @@ function RecipePageComponent() {
                     <h1 className="text-3xl md:text-4xl font-bold font-headline">
                         Tu Receta Personalizada
                     </h1>
-                    <nav>
+                    <nav className="flex items-center gap-2">
+                        <ThemeToggle />
                         <Link href="/" passHref>
                             <Button variant="ghost">
                                 <Home className="mr-2" />

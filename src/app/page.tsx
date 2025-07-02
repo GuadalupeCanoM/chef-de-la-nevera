@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, Suspense } from 'react';
@@ -19,6 +20,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { identifyIngredientsFromImage, getSearchSuggestions } from '@/app/actions';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const formSchema = z.object({
   ingredients: z.string().min(10, {
@@ -189,7 +191,8 @@ function HomeComponent() {
                 <ChefHat className="w-10 h-10 text-primary" />
                 Cocina con Luprinchef
             </h1>
-            <nav>
+            <nav className="flex items-center gap-2">
+                <ThemeToggle />
                 <Link href="/favorites" passHref>
                     <Button variant="ghost">
                         <BookHeart className="mr-2" />

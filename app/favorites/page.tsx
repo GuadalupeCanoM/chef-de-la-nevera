@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Home, BookHeart, Search, FolderPlus, Trash2, MoreHorizontal, Folder as FolderIcon, Loader2, LogIn } from 'lucide-react';
+import { Home, BookHeart, Search, FolderPlus, Trash2, MoreHorizontal, Folder as FolderIcon, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { FavoriteRecipeCard } from '@/components/favorite-recipe-card';
@@ -26,18 +26,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Separator } from '@/components/ui/separator';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { useAuth } from '@/hooks/use-auth';
-import { AuthButton } from '@/components/auth-button';
 
 export default function FavoritesPage() {
-    const { user, loading: authLoading, signInWithGoogle } = useAuth();
-    const { favorites, folders, recipeFolderMap, createFolder, deleteFolder, moveRecipeToFolder, removeFavorite, loading: favoritesLoading } = useFavorites();
+    const { favorites, folders, recipeFolderMap, createFolder, deleteFolder, moveRecipeToFolder, removeFavorite, loading } = useFavorites();
     const [searchTerm, setSearchTerm] = useState('');
     const [newFolderName, setNewFolderName] = useState('');
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
     const router = useRouter();
-
-    const isLoading = authLoading || favoritesLoading;
 
     const handleGenerateWithSuggestions = (ingredients: string[]) => {
         const params = new URLSearchParams();
@@ -117,44 +112,10 @@ export default function FavoritesPage() {
         </FavoriteRecipeCard>
     );
 
-    if (isLoading) {
+    if (loading) {
         return (
             <div className="flex justify-center items-center min-h-screen">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            </div>
-        )
-    }
-
-    if (!user) {
-        return (
-            <div className="flex flex-col items-center min-h-screen p-4 md:p-8">
-                 <header className="flex justify-between items-center w-full max-w-5xl mb-8">
-                     <h1 className="text-3xl md:text-4xl font-bold font-headline flex items-center gap-3">
-                        <BookHeart className="w-10 h-10 text-primary" />
-                        Recetas Favoritas
-                    </h1>
-                    <nav className="flex items-center gap-2">
-                        <ThemeToggle />
-                        <Link href="/" passHref>
-                            <Button variant="ghost">
-                                <Home className="mr-2" />
-                                Inicio
-                            </Button>
-                        </Link>
-                         <AuthButton />
-                    </nav>
-                </header>
-                <main className="w-full max-w-5xl flex-grow flex items-center justify-center">
-                    <div className="text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg mt-16">
-                        <BookHeart className="w-12 h-12 mx-auto mb-4 text-primary/70" />
-                        <h2 className="text-xl font-semibold text-foreground">Inicia sesión para ver tus favoritos</h2>
-                        <p className="mt-2">Guarda y organiza tus recetas favoritas en un solo lugar.</p>
-                         <Button onClick={signInWithGoogle} className="mt-6">
-                            <LogIn className="mr-2 h-4 w-4" />
-                            Iniciar sesión con Google
-                        </Button>
-                    </div>
-                </main>
             </div>
         )
     }
@@ -175,7 +136,6 @@ export default function FavoritesPage() {
                                 Inicio
                             </Button>
                         </Link>
-                        <AuthButton />
                     </nav>
                 </header>
 
